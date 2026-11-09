@@ -6,11 +6,11 @@ This document defines how the Pylon website (`bypylon.com`) is hosted on GitHub 
 
 ## Active Repository and Deployment Status
 
-* Repository URL: https://github.com/mukpostproduction-debug/bypylon
+* Repository URL: https://github.com/pyloncollective/bypylon
 * Production URL: https://bypylon.com
 * Redirect URL: http://www.bypylon.com -> https://bypylon.com
 * Branch: `main`
-* Build Engine: GitHub Pages (Root path `/`)
+* Build Engine: GitHub Pages (Root path `/`) + Cloudflare CDN / R2
 * SSL Certificate: Let's Encrypt (Issued, HTTPS Enforced)
 * Hosting Cost: $0.00 / month
 

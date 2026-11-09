@@ -29,7 +29,7 @@ Add one `CNAME` record to route `www.bypylon.com` to your GitHub Pages URL:
 
 | Type | Host / Name | Value / Points To | TTL | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| **CNAME** | `www` | `<your-github-username>.github.io` | Automatic / 1 Hour | Routes www to GitHub Pages |
+| **CNAME** | `www` | `pyloncollective.github.io` | Automatic / 1 Hour | Routes www to GitHub Pages |
 
 ---
 
