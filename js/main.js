@@ -93,6 +93,9 @@
     intro.classList.add('is-done');
     document.body.classList.remove('is-loading');
     site.classList.add('is-in');
+    // honour #section deep links (body was overflow:hidden during load)
+    const target = location.hash && document.querySelector(location.hash);
+    if (target) target.scrollIntoView();
   }
 
   const params = new URLSearchParams(location.search);
@@ -109,13 +112,34 @@
   ]);
 
   ready.then(() => {
-    if (params.has('skip') || reduced) skip();
+    if (params.has('skip') || params.has('role') || location.hash || reduced) skip();
     else play();
   });
 
-  replayBtn.addEventListener('click', play);
+  if (replayBtn) replayBtn.addEventListener('click', play);
   document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea')) return;
     if (e.key === 'r' || e.key === 'R') play();
     if (e.key === 'Escape') skip();
   });
+
+  // Nav: highlight the section currently in view
+  const navLinks = Array.from(document.querySelectorAll('.nav [data-nav]'));
+  const sections = navLinks
+    .map((a) => document.getElementById(a.dataset.nav))
+    .filter(Boolean);
+  if ('IntersectionObserver' in window && sections.length) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        navLinks.forEach((a) => a.classList.toggle('is-active', a.dataset.nav === en.target.id));
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    sections.forEach((s) => io.observe(s));
+    // clear highlight when back on the hero
+    const hero = document.getElementById('top');
+    if (hero) new IntersectionObserver(([en]) => {
+      if (en.isIntersecting) navLinks.forEach((a) => a.classList.remove('is-active'));
+    }, { rootMargin: '-45% 0px -50% 0px' }).observe(hero);
+  }
 })();

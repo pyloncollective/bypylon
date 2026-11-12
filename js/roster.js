@@ -29,6 +29,7 @@
     count.textContent = String(shown);
 
     const url = new URL(location.href);
+    url.searchParams.delete('skip');
     if (filter === 'all') url.searchParams.delete('role');
     else url.searchParams.set('role', filter);
     history.replaceState(null, '', url);
@@ -37,6 +38,10 @@
   buttons.forEach((btn) => btn.addEventListener('click', () => apply(btn.dataset.filter)));
 
   const initial = new URLSearchParams(location.search).get('role');
-  if (initial && buttons.some((b) => b.dataset.filter === initial && !b.hidden)) apply(initial);
+  if (initial && buttons.some((b) => b.dataset.filter === initial && !b.hidden)) {
+    apply(initial);
+    const sec = document.getElementById('roster');
+    if (sec) requestAnimationFrame(() => sec.scrollIntoView());
+  }
 })();
 
