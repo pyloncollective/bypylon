@@ -3,809 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PYLON COLLECTIVE — Commercial Production Boutique & Director Collective</title>
-  <meta name="description" content="Pylon Collective is a Toronto-based commercial production company, creative agency, and 11-artist director roster with dedicated post finishing via Muk Post.">
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="PYLON COLLECTIVE — Toronto Production Boutique">
-  <meta property="og:description" content="Cinematic Vision. Auteur Discipline. Commercial Production, Creative Agency & 11-Member Collective.">
-  <meta property="og:image" content="assets/images/maze-titlecard.png">
-  <meta property="og:type" content="website">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="assets/images/pylon-mark.svg">
-
-  <!-- Google Fonts: Playfair Display, Syne, Inter, JetBrains Mono -->
+  <title>PYLON</title>
+  <meta name="description" content="Pylon Collective — commercial production, creative agency, director roster.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,700;1,400;1,600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Production Stylesheet -->
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&family=Bebas+Neue&family=IBM+Plex+Mono:wght@500&family=Playfair+Display:ital,wght@1,700&family=Syne:wght@800&family=Unbounded:wght@900&display=block" rel="stylesheet">
+  <link rel="preload" as="image" href="assets/logo.png">
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="is-loading">
 
-  <!-- Custom Cinematic Cursor (Paragon style) -->
-  <div class="custom-cursor-dot"></div>
-  <div class="custom-cursor-follower"></div>
-
-  <!-- Site Navigation Header -->
-  <header class="site-header">
-    <div class="nav-container">
-      
-      <!-- Brand Lockup -->
-      <a href="#hero" class="brand-lockup">
-        <svg class="brand-mark" viewBox="0 0 100 100" fill="currentColor">
-          <polygon points="50,8 15,92 25,92 50,30 75,92 85,92"/>
-          <line x1="28" y1="64" x2="72" y2="64" stroke="currentColor" stroke-width="5"/>
-          <line x1="36" y1="46" x2="64" y2="46" stroke="currentColor" stroke-width="4"/>
-        </svg>
-        <span class="brand-wordmark">PYLON</span>
-        <span class="brand-badge">TORONTO</span>
-      </a>
-
-      <!-- Desktop Navigation Menu -->
-      <ul class="nav-menu">
-        <li><a href="#work" class="nav-link">Work</a></li>
-        <li><a href="#capabilities" class="nav-link">Capabilities</a></li>
-        <li><a href="#roster" class="nav-link">Collective</a></li>
-        <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#contact" class="nav-link">Contact</a></li>
-      </ul>
-
-      <!-- Nav Actions -->
-      <div class="nav-actions">
-        <div class="city-time">
-          <span class="time-pulse"></span>
-          <span id="toronto-time">TORONTO 17:39 EST</span>
-        </div>
-        <button class="sound-toggle-btn" aria-label="Toggle Sound Ambience">
-          <span>SOUND OFF</span>
-        </button>
-        <a href="#contact" class="nav-cta-btn">
-          <span>INQUIRE</span>
-        </a>
-        <button class="mobile-toggle-btn" aria-label="Toggle Menu">
-          <span class="mobile-toggle-line"></span>
-          <span class="mobile-toggle-line"></span>
-          <span class="mobile-toggle-line"></span>
-        </button>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- Mobile Menu Drawer (1st December style) -->
-  <div class="mobile-drawer">
-    <ul class="mobile-menu-list">
-      <li><a href="#work" class="mobile-menu-link">Work <span class="number">01</span></a></li>
-      <li><a href="#capabilities" class="mobile-menu-link">Capabilities <span class="number">02</span></a></li>
-      <li><a href="#roster" class="mobile-menu-link">The Roster <span class="number">03</span></a></li>
-      <li><a href="#about" class="mobile-menu-link">Who We Are <span class="number">04</span></a></li>
-      <li><a href="#contact" class="mobile-menu-link">Inquire <span class="number">05</span></a></li>
-    </ul>
-    <div class="mobile-drawer-bottom">
-      <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">
-        Pylon Collective // 124 Hallam St, Toronto, ON
-      </p>
-      <ul class="mobile-socials">
-        <li><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></li>
-        <li><a href="https://vimeo.com" target="_blank" rel="noopener">Vimeo</a></li>
-        <li><a href="https://youtube.com" target="_blank" rel="noopener">YouTube</a></li>
-      </ul>
-    </div>
+  <!-- ============================================================
+       INTRO LOADER — logo flash sequence (Paragon-style)
+       Sequence is driven by js/main.js -> LOGOS array.
+       ============================================================ -->
+  <div id="intro" aria-hidden="true">
+    <div class="intro-stage" id="introStage"></div>
+    <div class="intro-curtain" id="introCurtain"></div>
   </div>
 
-  <main>
+  <!-- Hidden logo library. main.js clones these into the stage in order. -->
+  <template id="logoLibrary">
 
-    <!-- Marquee Ticker 01 -->
-    <div class="marquee-bar" style="margin-top: 5rem;">
-      <div class="marquee-inner">
-        <div class="marquee-item"><span class="highlight">COMMERCIAL PRODUCTION</span> // TORONTO</div>
-        <div class="marquee-item">CREATIVE AGENCY & DIRECTING COLLECTIVE</div>
-        <div class="marquee-item"><span class="highlight">POST SUPERVISION</span> // MUK POST FINISHING</div>
-        <div class="marquee-item">35MM / 16MM ANALOG CELLULOID HERITAGE</div>
-        <div class="marquee-item"><span class="highlight">COMMERCIAL PRODUCTION</span> // TORONTO</div>
-        <div class="marquee-item">CREATIVE AGENCY & DIRECTING COLLECTIVE</div>
-        <div class="marquee-item"><span class="highlight">POST SUPERVISION</span> // MUK POST FINISHING</div>
-        <div class="marquee-item">35MM / 16MM ANALOG CELLULOID HERITAGE</div>
+    <!-- 01 · ORIGINAL -->
+    <div class="logo" data-id="original">
+      <img src="assets/logo.png" alt="" class="logo-original">
+    </div>
+
+    <!-- 02 · Spaced serif wordmark w/ boxed icon -->
+    <div class="logo" data-id="serif-spaced">
+      <div class="lg-serif-spaced"><span class="box">&#9650;</span><span>P</span><span>Y</span><span>L</span><span>O</span><span>N</span></div>
+    </div>
+
+    <!-- 03 · Racing italic + speed slashes -->
+    <div class="logo" data-id="racing">
+      <div class="lg-racing">PYLON<i></i><i></i><i></i></div>
+    </div>
+
+    <!-- 04 · Circle badge -->
+    <div class="logo" data-id="badge-pyln">
+      <div class="lg-badge"><span>Pyln</span></div>
+    </div>
+
+    <!-- 05 · Editorial italic stack -->
+    <div class="logo" data-id="editorial">
+      <div class="lg-editorial">Pylon<small>COLLECTIVE</small></div>
+    </div>
+
+    <!-- 06 · Track oval -->
+    <div class="logo" data-id="track">
+      <div class="lg-track"><span>PYLN'S</span></div>
+    </div>
+
+    <!-- 07 · Cone icon -->
+    <div class="logo" data-id="cone">
+      <div class="lg-cone">
+        <svg viewBox="0 0 100 100" width="84" height="84"><path d="M42 8h16l26 76H16z" fill="#fff"/><path d="M33 36h34l4 12H29zM25 60h50l4 12H21z" fill="#0d0d0e"/><rect x="8" y="84" width="84" height="8" fill="#fff"/></svg>
+        <span>PYLON</span>
       </div>
     </div>
 
-    <!-- Hero Section (Paragon & 1st December style) -->
-    <section class="hero-section" id="hero">
-      <div class="hero-media-wrapper">
-        <img class="hero-media-canvas" src="assets/images/maze-titlecard.png" alt="Pylon Film Still">
+    <!-- 08 · Star / compass -->
+    <div class="logo" data-id="compass">
+      <div class="lg-compass">
+        <svg viewBox="0 0 100 100" width="76" height="76"><circle cx="50" cy="50" r="44" fill="none" stroke="#fff" stroke-width="6"/><path d="M50 8 58 42 92 50 58 58 50 92 42 58 8 50 42 42z" fill="#fff"/></svg>
+        <span>///PYL</span>
       </div>
+    </div>
 
-      <div class="hero-content">
-        <div class="hero-meta-row">
-          <div class="hero-badge-pill">
-            <span class="rec-dot"></span>
-            <span>04 | TECH, WEB & POST — V1 LIVE STAGING</span>
-          </div>
-          <div class="hero-specs-pill">
-            <span>ARRI ALEXA 35 // COOKE ANAMORPHIC // 35MM TUNGSTEN</span>
-          </div>
-        </div>
+    <!-- 09 · Mono bracket -->
+    <div class="logo" data-id="mono">
+      <div class="lg-mono">[ PYLON ]</div>
+    </div>
 
-        <h1 class="hero-title">
-          CINEMATIC <span class="italic-serif">Vision.</span><br>
-          AUTEUR <span class="tungsten-accent">DISCIPLINE.</span>
-        </h1>
+    <!-- 10 · Square monogram -->
+    <div class="logo" data-id="monogram">
+      <div class="lg-monogram"><span>P</span><small>PYLON</small></div>
+    </div>
 
-        <div class="hero-footer-grid">
-          <p class="hero-description">
-            <strong>Pylon Collective</strong> is an independent commercial production boutique, creative agency, and 11-member director roster based in Toronto. We bridge tactile celluloid craft with disciplined line production and master finishing via Muk Post.
-          </p>
+    <!-- 11 · Wide w/ orb O -->
+    <div class="logo" data-id="orb-wide">
+      <div class="lg-orbwide">PYL<span class="orb"></span>N</div>
+    </div>
 
-          <div class="hero-actions">
-            <a href="#work" class="btn-primary">
-              <span>EXPLORE WORK ↓</span>
-            </a>
-            <button class="btn-secondary play-reel-trigger">
-              <span>WATCH REEL ▷</span>
-            </button>
-          </div>
-        </div>
+    <!-- 12 · Transmission tower -->
+    <div class="logo" data-id="tower">
+      <div class="lg-tower">
+        <svg viewBox="0 0 100 120" width="70" height="84" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="miter"><path d="M50 4 30 116M50 4l20 112M22 30h56M14 52h72M38 30l24 22M62 30 38 52M34 76h32M36 52l28 24M64 52 36 76"/></svg>
+        <span>PYLON</span>
       </div>
+    </div>
+
+    <!-- 13 · Lowercase grotesk -->
+    <div class="logo" data-id="lower">
+      <div class="lg-lower">pylon.</div>
+    </div>
+
+    <!-- 14 · Condensed stencil -->
+    <div class="logo" data-id="condensed">
+      <div class="lg-condensed">PY<b></b>LON<small>PRODUCTIONS</small></div>
+    </div>
+
+    <!-- 15 · Bold block w/ underline -->
+    <div class="logo" data-id="block">
+      <div class="lg-block">PYLON<span>FILMS&nbsp;&nbsp;·&nbsp;&nbsp;TORONTO</span></div>
+    </div>
+
+    <!-- FINAL · Placeholder final mark (swap when the final logo is locked) -->
+    <div class="logo is-final" data-id="final">
+      <svg class="final-mark" viewBox="0 0 512 512" width="132" height="132">
+        <circle class="final-orb" cx="256" cy="105" r="36"/>
+        <path class="final-body" fill-rule="evenodd" d="M231 160h50v45h75v32h-75v33h100v34H281l115 156h-56l-84-116-84 116h-56l115-156H131v-34h100v-33h-75v-32h75z"/>
+      </svg>
+    </div>
+
+  </template>
+
+  <!-- ============================================================
+       SITE (placeholder landing — rebuilt step by step)
+       ============================================================ -->
+  <main id="site">
+    <header class="nav">
+      <div class="nav-left">
+        <a href="#">Work</a>
+        <a href="#">Who We Are</a>
+        <a href="roster.html">Roster</a>
+      </div>
+      <div class="nav-right">
+        <a href="#" class="nav-cta">Contact</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1 class="sr-only">Pylon</h1>
+
+      <!-- Looping reel: full-bleed, sits behind the knockout band -->
+      <video class="hero-video" id="heroVideo"
+             src="assets/videos/home-reel-colour.mp4"
+             poster="assets/images/home-reel-colour-poster.jpg"
+             autoplay muted loop playsinline preload="auto"></video>
+
+      <!-- Paper strip behind nav -->
+      <div class="hero-navstrip"></div>
+
+      <!-- Knockout band: paper with PYLON cut out, reel shows through -->
+      <svg class="hero-knockout" viewBox="0 0 1000 232" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+        <defs>
+          <mask id="pylonCut" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="232">
+            <rect width="1000" height="232" fill="#fff"/>
+            <text x="500" y="214" text-anchor="middle"
+                  textLength="968" lengthAdjust="spacingAndGlyphs"
+                  font-family="Archivo Black, sans-serif" font-size="282"
+                  fill="#000">PYLON</text>
+          </mask>
+        </defs>
+        <rect width="1000" height="232" fill="#f4f3ef" mask="url(#pylonCut)"/>
+      </svg>
     </section>
 
-    <!-- Festival Laurels & Accreditations -->
-    <section class="laurels-section">
-      <div class="laurels-container">
-        <span class="laurels-heading">OFFICIAL RECOGNITIONS & FESTIVAL SELECTIONS</span>
-        <div class="laurels-grid">
-          <div class="laurel-item">
-            <img class="laurel-img" src="assets/images/laurel-oneness.png" alt="Oneness Film Festival Award">
-            <span class="laurel-text">ONENESS FESTIVAL // HONOURABLE MENTION</span>
-          </div>
-          <div class="laurel-item">
-            <img class="laurel-img" src="assets/images/laurel-vff23.png" alt="Victoria Film Festival Selection">
-            <span class="laurel-text">VFF23 // OFFICIAL SELECTION</span>
-          </div>
-          <div class="laurel-item">
-            <img class="laurel-img" src="assets/images/laurel-forestcity.png" alt="Forest City Film Festival">
-            <span class="laurel-text">FOREST CITY // SPECIAL JURY PRIZE</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Selected Works Section -->
-    <section class="work-section" id="work">
-      <div class="section-header">
-        <div>
-          <span class="section-label">01 / SELECTED WORK</span>
-          <h2 class="section-title">COMMERCIAL & NARRATIVE ARCHIVE</h2>
-        </div>
-
-        <!-- Filter Controls -->
-        <div class="filter-tabs">
-          <button class="filter-btn is-active" data-filter="all">All [6]</button>
-          <button class="filter-btn" data-filter="commercial">Commercial [2]</button>
-          <button class="filter-btn" data-filter="narrative">Narrative [2]</button>
-          <button class="filter-btn" data-filter="music-video">Music Video [2]</button>
-        </div>
-      </div>
-
-      <!-- Work Cards Grid -->
-      <div class="work-grid">
-
-        <!-- Card 1: MAZE -->
-        <article class="work-card col-span-8" data-category="narrative" data-project="maze">
-          <div class="card-media-wrapper">
-            <span class="card-pill-tag">Narrative Film</span>
-            <span class="card-year-tag">2025</span>
-            <img class="card-img" src="assets/images/still-01.jpg" alt="MAZE Short Film Still">
-            <div class="card-hover-overlay">
-              <span class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.72rem;">QUICK VIEW CASE STUDY ↗</span>
-            </div>
-          </div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <h3 class="card-title">MAZE — SHORT FILM</h3>
-              <span class="card-arrow">↗</span>
-            </div>
-            <div class="card-credits-row">
-              <span>DIR. DECLAN MCKENNA & MASON CLINE</span>
-              <span class="bullet">/</span>
-              <span>DP. DARIO BUTERA</span>
-              <span class="bullet">/</span>
-              <span>COLOR. JACKSON MCMURDO (MUK POST)</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 2: KAI BANKS -->
-        <article class="work-card col-span-4" data-category="music-video" data-project="kai-banks">
-          <div class="card-media-wrapper">
-            <span class="card-pill-tag">Music Video</span>
-            <span class="card-year-tag">2025</span>
-            <img class="card-img" src="assets/images/still-04.jpg" alt="Kai Banks Epilogue Visuals">
-            <div class="card-hover-overlay">
-              <span class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.72rem;">QUICK VIEW CASE STUDY ↗</span>
-            </div>
-          </div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <h3 class="card-title">KAI BANKS — EPILOGUE</h3>
-              <span class="card-arrow">↗</span>
-            </div>
-            <div class="card-credits-row">
-              <span>DIR. MASON CLINE</span>
-              <span class="bullet">/</span>
-              <span>DP. DARIO BUTERA</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 3: TORONTO 35MM -->
-        <article class="work-card col-span-6" data-category="commercial" data-project="toronto-35mm">
-          <div class="card-media-wrapper">
-            <span class="card-pill-tag">Commercial Spec</span>
-            <span class="card-year-tag">2025</span>
-            <img class="card-img" src="assets/images/still-07.jpg" alt="Toronto 35mm Spec">
-            <div class="card-hover-overlay">
-              <span class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.72rem;">QUICK VIEW CASE STUDY ↗</span>
-            </div>
-          </div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <h3 class="card-title">TORONTO ARCHIVE — 35MM SPEC</h3>
-              <span class="card-arrow">↗</span>
-            </div>
-            <div class="card-credits-row">
-              <span>DP. JORDAN WONG & DARIO BUTERA</span>
-              <span class="bullet">/</span>
-              <span>DESIGN. JESSICA BINNS</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 4: FOREST CITY -->
-        <article class="work-card col-span-6" data-category="narrative" data-project="forest-city">
-          <div class="card-media-wrapper">
-            <span class="card-pill-tag">Documentary</span>
-            <span class="card-year-tag">2024</span>
-            <img class="card-img" src="assets/images/still-10.jpg" alt="Forest City Doc Still">
-            <div class="card-hover-overlay">
-              <span class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.72rem;">QUICK VIEW CASE STUDY ↗</span>
-            </div>
-          </div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <h3 class="card-title">FOREST CITY — DOCUMENTARY</h3>
-              <span class="card-arrow">↗</span>
-            </div>
-            <div class="card-credits-row">
-              <span>DIR. DECLAN MCKENNA</span>
-              <span class="bullet">/</span>
-              <span>PROD. MAYA CHARIANDY & JUSTIN TAN</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 5: KINETIC -->
-        <article class="work-card col-span-4" data-category="commercial" data-project="kinetic">
-          <div class="card-media-wrapper">
-            <span class="card-pill-tag">Commercial</span>
-            <span class="card-year-tag">2025</span>
-            <img class="card-img" src="assets/images/still-02.jpg" alt="Kinetic Running Campaign">
-            <div class="card-hover-overlay">
-              <span class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.72rem;">QUICK VIEW CASE STUDY ↗</span>
-            </div>
-          </div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <h3 class="card-title">KINETIC RUNNING</h3>
-              <span class="card-arrow">↗</span>
-            </div>
-            <div class="card-credits-row">
-              <span>DIR. MISAN EDEMA</span>
-              <span class="bullet">/</span>
-              <span>G&E. DICKSON NTIAMOAH</span>
-            </div>
-          </div>
-        </article>
-
-        <!-- Card 6: 124 HALLAM -->
-        <article class="work-card col-span-8" data-category="music-video" data-project="hallam-sessions">
-          <div class="card-media-wrapper">
-            <span class="card-pill-tag">Live Sessions</span>
-            <span class="card-year-tag">2025</span>
-            <img class="card-img" src="assets/images/still-03.jpg" alt="124 Hallam Live Session">
-            <div class="card-hover-overlay">
-              <span class="btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.72rem;">QUICK VIEW CASE STUDY ↗</span>
-            </div>
-          </div>
-          <div class="card-info">
-            <div class="card-title-row">
-              <h3 class="card-title">124 HALLAM — LIVE STUDIO</h3>
-              <span class="card-arrow">↗</span>
-            </div>
-            <div class="card-credits-row">
-              <span>PROD DESIGN. JESSICA BINNS</span>
-              <span class="bullet">/</span>
-              <span>SOUND. DANIEL FUSCO</span>
-            </div>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <!-- Capabilities / What We Do (Paragon interactive accordion) -->
-    <section class="capabilities-section" id="capabilities">
-      <div class="capabilities-container">
-        <div class="section-header" style="border-bottom: none; margin-bottom: 2rem;">
-          <div>
-            <span class="section-label">02 / PILLARS & CAPABILITIES</span>
-            <h2 class="section-title">HOW WE ENGAGE CLIENTS & AGENCIES</h2>
-          </div>
-          <p style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); max-width: 440px;">
-            We operate as an integrated production ecosystem: taking campaigns from rough ideation through on-set execution and final cinema delivery.
-          </p>
-        </div>
-
-        <div class="capabilities-accordion">
-          
-          <!-- Pillar 1: Creative -->
-          <div class="capability-item is-active">
-            <button class="capability-header">
-              <span class="capability-number">01</span>
-              <h3 class="capability-title">PYLON CREATIVE</h3>
-              <span class="capability-toggle-icon">+</span>
-            </button>
-            <div class="capability-body">
-              <div class="capability-content-grid">
-                <p class="capability-description">
-                  Our creative arm develops bespoke director treatments, visual worldbuilding decks, scriptwriting, and brand campaign architectures built to win competitive agency pitches.
-                </p>
-                <ul class="capability-deliverables-list">
-                  <li>Director Pitch Treatments & Moodboards</li>
-                  <li>Campaign Ideation & Script Development</li>
-                  <li>Storyboard Architecture & Animatics</li>
-                  <li>Brand Worldbuilding & Narrative Strategy</li>
-                </ul>
-                <div class="capability-preview-media">
-                  <img src="assets/images/still-05.jpg" alt="Creative Treatment Still">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pillar 2: Production -->
-          <div class="capability-item">
-            <button class="capability-header">
-              <span class="capability-number">02</span>
-              <h3 class="capability-title">PYLON PICTURES</h3>
-              <span class="capability-toggle-icon">+</span>
-            </button>
-            <div class="capability-body">
-              <div class="capability-content-grid">
-                <p class="capability-description">
-                  Full-tier commercial and narrative line production. We deploy seasoned Toronto union and indie crews, ARRI/RED cinema camera packages, anamorphic glass, and on-set supervision.
-                </p>
-                <ul class="capability-deliverables-list">
-                  <li>Full Line Production & Line Producer Bidding</li>
-                  <li>Union & Indie Crew Manifests (DP, G&E, Sound)</li>
-                  <li>Camera & Lighting Gear Packages (ARRI / Cooke)</li>
-                  <li>Location Scouting, Permitting & Insurance</li>
-                </ul>
-                <div class="capability-preview-media">
-                  <img src="assets/images/still-06.jpg" alt="Production Still">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pillar 3: Post & Finishing -->
-          <div class="capability-item">
-            <button class="capability-header">
-              <span class="capability-number">03</span>
-              <h3 class="capability-title">POST & FINISHING (MUK POST)</h3>
-              <span class="capability-toggle-icon">+</span>
-            </button>
-            <div class="capability-body">
-              <div class="capability-content-grid">
-                <p class="capability-description">
-                  Finishing powerhouse partnered directly with Jackson McMurdo’s Muk Post. Complete DaVinci Wide Gamut CST color grading, offline/online editorial, custom film print emulations, and 5.1/stereo audio master QC.
-                </p>
-                <ul class="capability-deliverables-list">
-                  <li>DaVinci Wide Gamut CST Master Color Grading</li>
-                  <li>Custom 35mm/16mm Film Stock Print Emulations</li>
-                  <li>Sound Design, Foley & Broadcast Stereo/5.1 Mix</li>
-                  <li>DCP Theatrical & ProRes 4444 XQ Archival Delivery</li>
-                </ul>
-                <div class="capability-preview-media">
-                  <img src="assets/images/still-08.jpg" alt="Post Finishing Still">
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- The 11-Member Collective Roster -->
-    <section class="roster-section" id="roster">
-      <div class="roster-intro-grid">
-        <div>
-          <span class="section-label">03 / THE ROSTER</span>
-          <h2 class="section-title">ELEVEN ARTISTS. ONE COLLECTIVE.</h2>
-        </div>
-        <p class="roster-intro-text">
-          Replacing rigid agency hierarchies with an auteur-led collective. Each Pylon member brings deep specialized craft across directing, cinematography, production design, finishing, and sound.
-        </p>
-      </div>
-
-      <div class="roster-grid">
-
-        <!-- Member 1: Mason Cline -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-01.jpg" alt="Mason Cline">
-            <span class="member-badge-dept">Directing / DP</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Mason Cline</h4>
-            <div class="member-role">Founder // Creative Director</div>
-            <p class="member-bio">Commercial director and cinematographer specializing in tactile, high-contrast imagery and narrative performance.</p>
-            <div class="member-credits-tag">CREDITS: MAZE, KAI BANKS, TORONTO ARCHIVE</div>
-          </div>
-        </div>
-
-        <!-- Member 2: Jackson McMurdo -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-02.jpg" alt="Jackson McMurdo">
-            <span class="member-badge-dept">Post / Finishing</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Jackson McMurdo</h4>
-            <div class="member-role">Head of Ops // Post Supervisor</div>
-            <p class="member-bio">Lead colorist at Muk Post and operational architect overseeing Pylon's post finishing, tech systems, and delivery standards.</p>
-            <div class="member-credits-tag">CREDITS: MUK POST FINISHING, MAZE, FOREST CITY</div>
-          </div>
-        </div>
-
-        <!-- Member 3: Dario Butera -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-03.jpg" alt="Dario Butera">
-            <span class="member-badge-dept">Camera / IT</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Dario Butera</h4>
-            <div class="member-role">Director of Photography // Tech Lead</div>
-            <p class="member-bio">Cinematographer with a deep command of camera optics, motion control, and studio footage archive systems.</p>
-            <div class="member-credits-tag">CREDITS: MAZE, KAI BANKS, HALLAM SESSIONS</div>
-          </div>
-        </div>
-
-        <!-- Member 4: Jessica Binns -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-04.jpg" alt="Jessica Binns">
-            <span class="member-badge-dept">Art / Socials</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Jessica Binns</h4>
-            <div class="member-role">Visual Curation // Production Designer</div>
-            <p class="member-bio">Leads visual identity, on-set production design, aesthetic curation, and digital gallery architecture.</p>
-            <div class="member-credits-tag">CREDITS: TORONTO ARCHIVE, 124 HALLAM, SOCIALS</div>
-          </div>
-        </div>
-
-        <!-- Member 5: Declan McKenna -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-05.jpg" alt="Declan McKenna">
-            <span class="member-badge-dept">Directing / EP</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Declan McKenna</h4>
-            <div class="member-role">Director // Executive Producer</div>
-            <p class="member-bio">Narrative and documentary auteur driving character depth, script architecture, and client commercial bidding.</p>
-            <div class="member-credits-tag">CREDITS: FOREST CITY, MAZE, CLIENT OUTREACH</div>
-          </div>
-        </div>
-
-        <!-- Member 6: Maya Chariandy -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-06.jpg" alt="Maya Chariandy">
-            <span class="member-badge-dept">Operations</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Maya Chariandy</h4>
-            <div class="member-role">Producer // Operations Lead</div>
-            <p class="member-bio">Operational backbone managing shoot schedules, collective assembly itineraries, and line-production workflows.</p>
-            <div class="member-credits-tag">CREDITS: OPERATIONS HUB, FOREST CITY, ADMIN</div>
-          </div>
-        </div>
-
-        <!-- Member 7: Jordan Wong -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-07.jpg" alt="Jordan Wong">
-            <span class="member-badge-dept">Brand / Camera</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Jordan Wong</h4>
-            <div class="member-role">Brand Director // Cinematographer</div>
-            <p class="member-bio">Bridges commercial brand positioning with sharp camera movement and high-energy cinematography.</p>
-            <div class="member-credits-tag">CREDITS: TORONTO ARCHIVE, BRAND STRATEGY</div>
-          </div>
-        </div>
-
-        <!-- Member 8: Dickson Ntiamoah -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-08.jpg" alt="Dickson Ntiamoah">
-            <span class="member-badge-dept">G&E / Merch</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Dickson Ntiamoah</h4>
-            <div class="member-role">Grip & Electric Lead // Camera</div>
-            <p class="member-bio">Masters lighting rigs, electric distribution, camera support mechanics, and collective apparel screenprinting.</p>
-            <div class="member-credits-tag">CREDITS: KINETIC, MAZE, STUDIO MERCH</div>
-          </div>
-        </div>
-
-        <!-- Member 9: Daniel Fusco -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-09.jpg" alt="Daniel Fusco">
-            <span class="member-badge-dept">Sound / Score</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Daniel Fusco</h4>
-            <div class="member-role">Sound Designer // Composer</div>
-            <p class="member-bio">Original cinematic scoring, tactile sound design, location audio capture, and final 5.1 theatrical mixing.</p>
-            <div class="member-credits-tag">CREDITS: MAZE SCORE, FOREST CITY, HALLAM</div>
-          </div>
-        </div>
-
-        <!-- Member 10: Misan Edema -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-10.jpg" alt="Misan Edema">
-            <span class="member-badge-dept">Creative</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Misan Edema</h4>
-            <div class="member-role">Director // Creative Outreach</div>
-            <p class="member-bio">Focuses on kinetic commercial storytelling, high-speed movement, and brand campaign collaborations.</p>
-            <div class="member-credits-tag">CREDITS: KINETIC RUNNING, SPEC CAMPAIGNS</div>
-          </div>
-        </div>
-
-        <!-- Member 11: Justin Tan -->
-        <div class="member-card">
-          <div class="member-photo-wrap">
-            <img src="assets/images/still-01.jpg" alt="Justin Tan">
-            <span class="member-badge-dept">Production / Grants</span>
-          </div>
-          <div class="member-details">
-            <h4 class="member-name">Justin Tan</h4>
-            <div class="member-role">Producer // Grant Researcher</div>
-            <p class="member-bio">Spearheads arts grant research, submission calendars, production logistics, and collective accounting support.</p>
-            <div class="member-credits-tag">CREDITS: GRANT PIPELINE, FINANCE HUB</div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Client Inquiry & Bidding Portal -->
-    <section class="contact-section" id="contact">
-      <div class="contact-container">
-        
-        <div class="contact-info-col">
-          <div>
-            <span class="section-label">04 / INQUIRE & ENGAGE</span>
-            <h2 class="section-title">START A PROJECT WITH PYLON</h2>
-            <p style="font-size: 1.1rem; color: var(--text-muted); margin-top: 1.5rem; line-height: 1.6;">
-              Whether you are an agency creative seeking a director treatment, a brand commissioning a hero campaign, or an independent filmmaker needing Muk Post finishing—reach out directly to our production desk.
-            </p>
-          </div>
-
-          <div class="contact-direct-info">
-            <div class="contact-info-block">
-              <h4>DIRECT INQUIRY DESK</h4>
-              <p><a href="mailto:contact@bypylon.com">contact@bypylon.com</a></p>
-            </div>
-            <div class="contact-info-block">
-              <h4>STUDIO BASE</h4>
-              <p>124 Hallam St, Toronto, ON M6H 1W8</p>
-            </div>
-            <div class="contact-info-block">
-              <h4>COMMERCIAL MARGIN STANDARD</h4>
-              <p style="color: var(--accent-tungsten);">30% Gross Production Target // 2-for-1 Indie Incubation</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Interactive Form Card -->
-        <div class="inquiry-form-card">
-          <form id="project-inquiry-form">
-            
-            <div class="form-group">
-              <label class="form-label">Project Discipline <span class="req">*</span></label>
-              <div class="form-radio-pills">
-                <label class="radio-pill">
-                  <input type="radio" name="discipline" value="commercial" checked>
-                  <span>Commercial & Branded</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="discipline" value="narrative">
-                  <span>Narrative / Doc</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="discipline" value="music-video">
-                  <span>Music Video</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="discipline" value="post-muk">
-                  <span>Muk Post / Color</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="client-name">Your Name / Agency / Brand <span class="req">*</span></label>
-              <input class="form-input" type="text" id="client-name" placeholder="e.g. Maya Lin / A24 Films" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="client-email">Email Address <span class="req">*</span></label>
-              <input class="form-input" type="email" id="client-email" placeholder="contact@domain.com" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Estimated Production Budget Tier</label>
-              <div class="form-radio-pills">
-                <label class="radio-pill">
-                  <input type="radio" name="budget" value="5-15k">
-                  <span>$5k – $15k</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="budget" value="15-30k" checked>
-                  <span>$15k – $30k</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="budget" value="30-75k">
-                  <span>$30k – $75k</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="budget" value="75k+">
-                  <span>$75k+ Tier</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="project-details">Project Scope & Target Timeline <span class="req">*</span></label>
-              <textarea class="form-textarea" id="project-details" rows="4" placeholder="Briefly describe the concept, deliverable count, shoot dates, or finishing scope..." required></textarea>
-            </div>
-
-            <button type="submit" class="form-submit-btn">
-              <span>TRANSMIT INQUIRY TO PYLON DESK →</span>
-            </button>
-
-            <div id="form-status-msg" class="form-status-msg"></div>
-          </form>
-        </div>
-
-      </div>
-    </section>
-
+    <button class="replay" id="replayBtn" type="button">Replay intro</button>
   </main>
 
-  <!-- Global Footer -->
-  <footer class="site-footer" id="about">
-    <div class="footer-container">
-      
-      <div class="footer-top-grid">
-        <div>
-          <div class="brand-lockup" style="margin-bottom: 1.5rem;">
-            <svg class="brand-mark" viewBox="0 0 100 100" fill="currentColor">
-              <polygon points="50,8 15,92 25,92 50,30 75,92 85,92"/>
-              <line x1="28" y1="64" x2="72" y2="64" stroke="currentColor" stroke-width="5"/>
-              <line x1="36" y1="46" x2="64" y2="46" stroke="currentColor" stroke-width="4"/>
-            </svg>
-            <span class="brand-wordmark">PYLON COLLECTIVE</span>
-          </div>
-          <p class="footer-statement">
-            COMMERCIAL DISCIPLINE. <span class="accent">AUTEUR REBELLION.</span>
-          </p>
-        </div>
-
-        <div class="footer-nav-col">
-          <h5>NAVIGATION</h5>
-          <ul class="footer-nav-list">
-            <li><a href="#work" class="footer-nav-link">Selected Work</a></li>
-            <li><a href="#capabilities" class="footer-nav-link">Capabilities</a></li>
-            <li><a href="#roster" class="footer-nav-link">The Collective</a></li>
-            <li><a href="#contact" class="footer-nav-link">Inquire</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-nav-col">
-          <h5>NETWORK & SOCIAL</h5>
-          <ul class="footer-nav-list">
-            <li><a href="https://instagram.com" class="footer-nav-link" target="_blank" rel="noopener">Instagram ↗</a></li>
-            <li><a href="https://vimeo.com" class="footer-nav-link" target="_blank" rel="noopener">Vimeo ↗</a></li>
-            <li><a href="https://youtube.com" class="footer-nav-link" target="_blank" rel="noopener">YouTube ↗</a></li>
-            <li><a href="https://linkedin.com" class="footer-nav-link" target="_blank" rel="noopener">LinkedIn ↗</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom-row">
-        <div>© 2026 PYLON COLLECTIVE LTD. ALL RIGHTS RESERVED.</div>
-        <div>POST FINISHING PARTNER: <span style="color: var(--accent-tungsten);">MUK POST</span></div>
-        <div>HOSTED ON GITHUB PAGES + CLOUDFLARE CDN</div>
-      </div>
-
-    </div>
-  </footer>
-
-  <!-- Case Study Interactive Modal Engine (1st December / Paragon Drawer) -->
-  <div class="case-study-modal" role="dialog" aria-modal="true">
-    <div class="modal-container">
-      
-      <div class="modal-header">
-        <div class="modal-title-meta">
-          <h2 class="modal-project-title">PROJECT TITLE</h2>
-          <span class="modal-project-category">CATEGORY</span>
-        </div>
-        <button class="modal-close-btn" aria-label="Close Case Study">CLOSE [ESC]</button>
-      </div>
-
-      <div class="modal-body">
-        
-        <!-- Video Frame -->
-        <div class="modal-video-frame">
-          <div class="modal-video-placeholder-ui">
-            <button class="play-circle-btn">▷</button>
-            <p>CLICK TO AUDITION 4K MASTER CUT</p>
-          </div>
-        </div>
-
-        <!-- Details & Credits Grid -->
-        <div class="modal-details-grid">
-          <div>
-            <span class="modal-synopsis-label">PROJECT SYNOPSIS & ART DIRECTION</span>
-            <p class="modal-synopsis-text">Project synopsis will load dynamically.</p>
-          </div>
-          <div>
-            <span class="modal-synopsis-label">PRODUCTION & CRAFT CREDITS</span>
-            <table class="modal-credits-table">
-              <tbody>
-                <!-- Rows injected dynamically by JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- High-Res Stills Gallery -->
-        <div>
-          <span class="modal-stills-heading">COLOR-GRADED 35MM / 16MM MASTER STILLS</span>
-          <div class="modal-stills-grid">
-            <!-- Stills injected dynamically by JS -->
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Main JavaScript Engine -->
   <script src="js/main.js"></script>
 </body>
 </html>
