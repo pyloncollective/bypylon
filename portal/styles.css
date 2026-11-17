@@ -574,6 +574,62 @@ html, body {
   color: var(--ink);
 }
 
+/* CV Upload & Auto-Fill Box */
+.cv-box {
+  background: linear-gradient(180deg, rgba(255, 77, 0, 0.08), rgba(21, 22, 25, 0.95));
+  border: 1px dashed rgba(255, 77, 0, 0.55);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cv-box.is-dragover {
+  border-style: solid;
+  border-color: var(--orange);
+  background: rgba(255, 77, 0, 0.16);
+}
+
+.cv-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cv-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--white);
+}
+
+.cv-sub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.cv-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--green);
+  background: var(--green-soft);
+  border: 1px solid rgba(47, 191, 113, 0.35);
+  padding: 6px 10px;
+}
+
 /* Dynamic Project Credit Cards */
 .projects-list {
   display: flex;
@@ -717,6 +773,28 @@ html, body {
   font-size: 10px;
   color: var(--faint);
   margin-bottom: 16px;
+}
+
+.mock-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.mock-portrait-slot {
+  width: 78px;
+  height: 98px;
+  flex-shrink: 0;
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 6px;
+  font-size: 9px;
+  line-height: 1.3;
+  color: var(--faint);
 }
 
 .mock-name {
@@ -866,3 +944,4 @@ html, body {
   .rail-note { display: none; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
 }
+

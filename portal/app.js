@@ -213,16 +213,16 @@
     {
       id: 'reel',
       num: '03',
-      label: 'Reel, Hero & Marks',
-      title: 'Showreel, Hero Visual & Loader Mark',
-      desc: 'Pick what plays at the top of your page, drop your portrait link, and share any Pylon logo variation sketch for the site intro loader.'
+      label: 'Reel & Hero Visual',
+      title: 'Showreel & Hero Visual',
+      desc: 'Pick what plays at the top of your page or drop your showreel link (unified member headshots are already reserved for our group shoot).'
     },
     {
       id: 'projects',
       num: '04',
       label: 'Film & Work Credits',
-      title: 'Selected Works & Credits',
-      desc: 'Add both Pylon projects and standout personal/external credits you want showcased on your profile. Star your top 3.'
+      title: 'Selected Works & CV Auto-Fill',
+      desc: 'Upload your CV (.pdf, .docx, .txt) or paste it to auto-fill your credits instantly, or add Pylon & personal projects card-by-card.'
     },
     {
       id: 'stills',
@@ -312,9 +312,9 @@
       heroType: 'video-loop',
       heroSourceUrl: '',
       heroTimecode: '',
-      portraitDriveUrl: '',
-      portraitNotes: '',
-      loaderLogoDriveUrl: '',
+      cvFileName: '',
+      cvDriveUrl: '',
+      cvExtractedText: '',
       projects: [createEmptyProject()],
       standaloneGalleryDriveUrl: '',
       btsDriveUrl: '',
@@ -428,9 +428,13 @@
       case 'craft':
         return Boolean(s.primaryCraft.trim() && s.tags.length > 0);
       case 'reel':
-        return Boolean(s.reelUrl.trim() || s.needReelCutHelp || s.portraitDriveUrl.trim() || s.heroSourceUrl.trim());
+        return Boolean(s.reelUrl.trim() || s.needReelCutHelp || s.heroSourceUrl.trim());
       case 'projects':
-        return s.projects.some((p) => p.title && p.title.trim() && p.role && p.role.trim());
+        return Boolean(
+          (s.cvExtractedText && s.cvExtractedText.trim()) ||
+          (s.cvDriveUrl && s.cvDriveUrl.trim()) ||
+          s.projects.some((p) => p.title && p.title.trim() && p.role && p.role.trim())
+        );
       case 'stills':
         return Boolean(s.standaloneGalleryDriveUrl.trim() || s.btsDriveUrl.trim() || s.awardsAndPress.trim());
       case 'links':
@@ -633,7 +637,7 @@
           <label>Editorial Copy Preference</label>
           <select class="select" data-field="bioPolishPref">
             <option value="polish" ${state.bioPolishPref === 'polish' ? 'selected' : ''}>Feel free to tighten / copy-edit my bio to match the Pylon site voice</option>
-            <option value="verbatim" ${state.bioPolishPref === 'verbatim' ? 'selected' : ''}>Keep my exact wording verbatim (check with me before changing)</option>
+            <option value="verbatim" ${state.bioPolishPref === 'verbatim' ? 'selected' : ''}>Keep my exact wording</option>
             <option value="draft-from-bullets" ${state.bioPolishPref === 'draft-from-bullets' ? 'selected' : ''}>I wrote rough bullet points above — please draft a clean bio for me to approve</option>
           </select>
         </div>
@@ -720,16 +724,7 @@
         <div class="field">
           <label>Hero Video / Still Source Link <span class="hint-inline">Drive or video URL</span></label>
           <input class="input" data-field="heroSourceUrl" value="${esc(state.heroSourceUrl)}" placeholder="https://drive.google.com/...">
-        </div>
-
-        <div class="field">
-          <label>Current Portrait / On-Set Photo of You <span class="hint-inline">Google Drive link (until our Jan 2027 group shoot)</span></label>
-          <input class="input" data-field="portraitDriveUrl" value="${esc(state.portraitDriveUrl)}" placeholder="https://drive.google.com/...">
-        </div>
-
-        <div class="field">
-          <label>Pylon Intro Loader — Personal Logo Sketch / Variation <span class="hint-inline">Optional Drive link</span></label>
-          <input class="input" data-field="loaderLogoDriveUrl" value="${esc(state.loaderLogoDriveUrl)}" placeholder="Drop a PNG/SVG/sketch link if you made a custom Pylon mark for the opening flash loader!">
+          <p class="helper">Headshots are already reserved in a uniform placeholder slot on everyone's page ahead of our group portrait shoot.</p>
         </div>
       `;
       bindFieldInputs(body);
@@ -857,8 +852,234 @@
     }
   }
 
+  /* ------------------------------------------------------------------------
+     CV UPLOAD (.PDF / .DOCX / .TXT) & CREDIT AUTO-PARSER
+     ------------------------------------------------------------------------ */
+
+  let pdfJsPromise = null;
+
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (pdfJsPromise) return pdfJsPromise;
+    pdfJsPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload = () => {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve(window.pdfjsLib);
+      };
+      s.onerror = () => reject(new Error('Could not load PDF parser'));
+      document.head.appendChild(s);
+    });
+    return pdfJsPromise;
+  }
+
+  async function extractTextFromPdf(file) {
+    const pdfjsLib = await loadPdfJs();
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const allLines = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      // Group text items by visual Y coordinate so tabular CV rows stay intact
+      const rows = [];
+      for (const item of content.items) {
+        if (!item.str || !item.str.trim()) continue;
+        const y = Math.round(item.transform[5]);
+        const x = item.transform[4];
+        let row = rows.find((r) => Math.abs(r.y - y) <= 4);
+        if (!row) {
+          row = { y, items: [] };
+          rows.push(row);
+        }
+        row.items.push({ x, str: item.str.trim() });
+      }
+      rows.sort((a, b) => b.y - a.y);
+      for (const r of rows) {
+        r.items.sort((a, b) => a.x - b.x);
+        allLines.push(r.items.map((i) => i.str).join('  '));
+      }
+    }
+    return allLines.join('\n');
+  }
+
+  async function extractTextFromDocx(file) {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const view = new DataView(buf.buffer);
+    let offset = 0;
+    while (offset + 30 < buf.length) {
+      if (view.getUint32(offset, true) !== 0x04034b50) break;
+      const compMethod = view.getUint16(offset + 8, true);
+      const compSize = view.getUint32(offset + 18, true);
+      const nameLen = view.getUint16(offset + 26, true);
+      const extraLen = view.getUint16(offset + 28, true);
+      const name = new TextDecoder().decode(buf.subarray(offset + 30, offset + 30 + nameLen));
+      const dataStart = offset + 30 + nameLen + extraLen;
+      const compData = buf.subarray(dataStart, dataStart + compSize);
+      if (name === 'word/document.xml') {
+        let xmlBytes = compData;
+        if (compMethod === 8 && typeof DecompressionStream !== 'undefined') {
+          const ds = new DecompressionStream('deflate-raw');
+          const writer = ds.writable.getWriter();
+          writer.write(compData);
+          writer.close();
+          const xmlBuf = await new Response(ds.readable).arrayBuffer();
+          xmlBytes = new Uint8Array(xmlBuf);
+        }
+        const xml = new TextDecoder().decode(xmlBytes);
+        return xml
+          .replace(/<\/w:tc>/g, '  ')
+          .replace(/<\/w:p>/g, '\n')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'");
+      }
+      offset = dataStart + compSize;
+    }
+    throw new Error('Could not read DOCX XML');
+  }
+
+  function parseCvTextIntoProjects(rawText) {
+    const ROLE_RX = /\b(executive producer|co-producer|line producer|associate producer|producer|co-director|director of photography|cinematographer|doc dp|dp|dop|director|1st ad|2nd ad|first assistant director|assistant director|gaffer|best boy|key grip|grip|1st ac|2nd ac|focus puller|camera operator|cam op|steadicam|ac|dit|production sound|sound mixer|boom op|sound designer|mixing|mastering|composer|production designer|art director|set dresser|prop master|props|costume designer|wardrobe|stylist|sfx makeup|makeup|editor|assistant editor|colourist|colorist|vfx|motion graphics|graphics|title design|writer|screenwriter|actor|cast|casting)\b/i;
+
+    const SKIP_RX = /^(education|skills|software|equipment|gear|awards|honours|honors|press|exhibitions|references|contact|experience|profile|summary|objective|languages|certifications)\b|@|linkedin\.com|instagram\.com|vimeo\.com|\b(bachelor|bfa|ba\b|toronto metropolitan|ryerson|high school|university|college)\b/i;
+
+    const lines = rawText
+      .split(/\r?\n/)
+      .map((l) => l.replace(/\s+/g, ' ').trim())
+      .filter((l) => l.length >= 4 && l.length <= 200);
+
+    let activeCat = 'Narrative Short';
+    const parsed = [];
+    const seen = new Set();
+
+    for (const raw of lines) {
+      const upper = raw.toUpperCase();
+      // Section headers switch default category
+      if (raw.length < 48 && !/\b(19|20)\d{2}\b/.test(raw)) {
+        if (/COMMERCIAL|BRANDED|ADVERTISING|SPEC/.test(upper)) { activeCat = 'Commercial / Spec'; continue; }
+        if (/MUSIC VIDEO/.test(upper)) { activeCat = 'Music Video'; continue; }
+        if (/DOCUMENTARY|NON-FICTION|DOC\b/.test(upper)) { activeCat = 'Documentary'; continue; }
+        if (/NARRATIVE|SHORT|FEATURE|FILM|FICTION|TELEVISION|SERIES/.test(upper)) { activeCat = 'Narrative Short'; continue; }
+        if (/DESIGN|3D|APPAREL|STYLING|ART/.test(upper)) { activeCat = 'Design / 3D / Apparel'; continue; }
+        if (/PHOTO/.test(upper)) { activeCat = 'Photography Series'; continue; }
+      }
+
+      if (SKIP_RX.test(raw)) continue;
+      if (/^\+?\d[\d\s().-]{7,}$/.test(raw)) continue;
+
+      const yearMatch = raw.match(/\b(201[6-9]|202[0-7])\b/);
+      const roleMatch = raw.match(ROLE_RX);
+      if (!yearMatch && !roleMatch) continue;
+      // Avoid multi-year employment spans like "2022 - 2025 Freelance Videographer" unless quoted
+      if (/\b20\d{2}\s*[-–—]\s*(20\d{2}|present|current)\b/i.test(raw) && !/["“”]/.test(raw)) continue;
+
+      const year = yearMatch ? yearMatch[1] : '2026';
+      let cat = activeCat;
+      if (/\b(music video|mv)\b/i.test(raw)) cat = 'Music Video';
+      else if (/\b(commercial|spec|campaign|branded)\b/i.test(raw)) cat = 'Commercial / Spec';
+      else if (/\b(documentary|doc)\b/i.test(raw)) cat = 'Documentary';
+      else if (/\b(short film|narrative|feature)\b/i.test(raw)) cat = 'Narrative Short';
+
+      let work = raw
+        .replace(/\b(201[6-9]|202[0-7])\b/g, '|')
+        .replace(/[•·—–|/]+/g, '|');
+
+      const parts = work
+        .split('|')
+        .map((s) => s.replace(/^[\s()[\]"'“”,-]+|[\s()[\]"'“”,-]+$/g, '').trim())
+        .filter(Boolean);
+
+      let title = '';
+      let role = '';
+      let client = '';
+
+      // Prefer quoted title if present
+      const qMatch = raw.match(/[“"]([^”"]{2,70})[”"]/);
+      if (qMatch) title = qMatch[1].trim();
+
+      for (const seg of parts) {
+        if (!role && ROLE_RX.test(seg) && !/^dir\.?\s/i.test(seg)) {
+          role = seg;
+        } else if (!title && !/^(short film|music video|commercial|feature|documentary|spec|dir\.|prod\.)/i.test(seg)) {
+          title = seg;
+        } else if (!client && seg !== title && seg !== role && !/^(short film|music video|commercial|feature|documentary|spec)$/i.test(seg)) {
+          client = seg;
+        }
+      }
+
+      if (!role && roleMatch) role = roleMatch[0];
+      if (!title || title.length < 2) continue;
+
+      const key = `${title.toLowerCase()}::${year}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      parsed.push({
+        id: 'proj_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        title,
+        category: cat,
+        year,
+        banner: /pylon/i.test(raw) ? 'Pylon Production' : 'Personal / External Credit',
+        role: role || '',
+        clientOrArtist: client,
+        watchUrl: '',
+        stillsDriveUrl: '',
+        hoverTimecode: '',
+        laurels: '',
+        featured: parsed.length < 4
+      });
+    }
+
+    return parsed;
+  }
+
+  function mergeParsedProjects(newCredits) {
+    if (!newCredits.length) {
+      showToast('CV saved — add or paste individual credit lines below');
+      return;
+    }
+    const existingFilled = state.projects.filter((p) => p.title && p.title.trim());
+    state.projects = [...existingFilled, ...newCredits];
+    saveLocalState();
+    showToast(`Auto-filled ${newCredits.length} credit${newCredits.length === 1 ? '' : 's'} from your CV`);
+  }
+
   function renderProjectsStep(body) {
     body.innerHTML = `
+      <div class="cv-box" id="cvDropBox">
+        <div class="cv-top">
+          <div>
+            <div class="cv-title">Have a Film CV or Resume? Auto-Fill Your Credits</div>
+            <p class="cv-sub">Drop a <strong>.PDF</strong>, <strong>.DOCX</strong>, or <strong>.TXT</strong> CV (or paste text) — we’ll auto-extract your credits into editable cards below and attach the full CV for Jackson, Jess &amp; Dario.</p>
+          </div>
+          <div class="cv-actions">
+            <label class="btn btn-sm btn-primary" style="cursor:pointer;">
+              Upload CV File
+              <input type="file" id="cvFileInput" accept=".pdf,.docx,.txt,.md" hidden>
+            </label>
+            <button type="button" class="btn btn-sm" id="togglePasteCvBtn">Paste CV Text</button>
+          </div>
+        </div>
+
+        ${state.cvFileName ? `<div class="cv-badge mono">Attached CV: ${esc(state.cvFileName)} (${state.cvExtractedText ? 'Parsed & Saved' : 'Saved'})</div>` : ''}
+
+        <div id="pasteCvArea" hidden style="display:flex; flex-direction:column; gap:10px;">
+          <textarea class="textarea" rows="5" id="pasteCvInput" placeholder="Paste your CV / credit list here (e.g. Title — Role — Year)...">${esc(state.cvExtractedText)}</textarea>
+          <div>
+            <button type="button" class="btn btn-sm btn-paper" id="runPasteParseBtn">Auto-Fill Credits From Text</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:4px;">
+          <label>Optional: Google Drive Link to Your Original CV PDF <span class="hint-inline">If you also want us to reference or link your formatted CV</span></label>
+          <input class="input" data-field="cvDriveUrl" value="${esc(state.cvDriveUrl || '')}" placeholder="https://drive.google.com/...">
+        </div>
+      </div>
+
       <div class="projects-list" id="projectsList">
         ${state.projects.map((p, idx) => `
           <div class="project-card" data-proj-idx="${idx}">
@@ -970,6 +1191,63 @@
     document.getElementById('addProjectBtn').addEventListener('click', () => {
       state.projects.push(createEmptyProject());
       saveLocalState();
+      renderProjectsStep(body);
+    });
+
+    bindFieldInputs(body);
+
+    const handleCvFile = async (file) => {
+      if (!file) return;
+      try {
+        setStatus(`Reading ${file.name}...`, true);
+        let text = '';
+        const lower = file.name.toLowerCase();
+        if (lower.endsWith('.pdf')) {
+          text = await extractTextFromPdf(file);
+        } else if (lower.endsWith('.docx')) {
+          text = await extractTextFromDocx(file);
+        } else {
+          text = await file.text();
+        }
+        state.cvFileName = file.name;
+        state.cvExtractedText = text.slice(0, 25000);
+        const credits = parseCvTextIntoProjects(text);
+        mergeParsedProjects(credits);
+        renderProjectsStep(body);
+      } catch (err) {
+        setStatus('Ready', false);
+        showToast('Could not read file — try Paste CV Text or Drive link');
+      }
+    };
+
+    const fileInp = document.getElementById('cvFileInput');
+    fileInp.addEventListener('change', (e) => handleCvFile(e.target.files[0]));
+
+    const dropBox = document.getElementById('cvDropBox');
+    dropBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropBox.classList.add('is-dragover');
+    });
+    dropBox.addEventListener('dragleave', () => dropBox.classList.remove('is-dragover'));
+    dropBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropBox.classList.remove('is-dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleCvFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    document.getElementById('togglePasteCvBtn').addEventListener('click', () => {
+      const area = document.getElementById('pasteCvArea');
+      area.hidden = !area.hidden;
+    });
+
+    document.getElementById('runPasteParseBtn').addEventListener('click', () => {
+      const txt = document.getElementById('pasteCvInput').value || '';
+      state.cvFileName = state.cvFileName || 'Pasted CV Text';
+      state.cvExtractedText = txt.slice(0, 25000);
+      const credits = parseCvTextIntoProjects(txt);
+      mergeParsedProjects(credits);
       renderProjectsStep(body);
     });
   }
@@ -1109,3 +1387,4 @@
     }
   } catch (_) {}
 })();
+
