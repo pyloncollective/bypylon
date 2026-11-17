@@ -39,29 +39,34 @@ A domain can only have **one** set of `MX` records handling incoming mail:
 
 ---
 
-## 3. Copy-Paste Forwarding Directory (Spaceship -> Email Forwarding)
+## 3. Active Email Forwarding Directory (`LIVE` on Spaceship `efwd`)
 
-### A. Studio & 5 Departmental Team Addresses
-| `@pylonpictures.com` Alias | Purpose / Team | Forward To |
-| :--- | :--- | :--- |
-| `contact@pylonpictures.com` | General Studio Inquiries (Website Footer) | `pylon.collective@gmail.com`, `mayachariandy@gmail.com`, `Declanfmckenna@gmail.com`, `mcmurdo.jackson@gmail.com` |
-| `workwithus@pylonpictures.com` *(or `outreach@`)* | `01 \| Client & Outreach` (Commercial / MV Bids) | `Declanfmckenna@gmail.com`, `misanedema38@gmail.com`, `Clinemase5@gmail.com`, `justin.c.tan2004@gmail.com` |
-| `finance@pylonpictures.com` | `02 \| Finance & Books` (Invoices & Receipts) | `dntiamoah8@gmail.com`, `justin.c.tan2004@gmail.com`, `mcmurdo.jackson@gmail.com`, `Declanfmckenna@gmail.com` |
-| `ops@pylonpictures.com` | `03 \| Operations` (Call Sheets & Scheduling) | `mayachariandy@gmail.com`, `justin.c.tan2004@gmail.com`, `mcmurdo.jackson@gmail.com` |
-| `tech@pylonpictures.com` *(or `post@`)* | `04 \| Tech, Web & Post` | `mcmurdo.jackson@gmail.com`, `dariob99@icloud.com`, `jessbinnss@gmail.com` |
-| `brand@pylonpictures.com` | `05 \| Brand & Strategy` (Press, Events & Socials) | `jordanmkwong@gmail.com`, `Clinemase5@gmail.com`, `daniel.fusco.04@gmail.com`, `jessbinnss@gmail.com` |
+**Verified Live DNS Records (Nov 16, 2026):**
+* `MX` (`@`, Priority `0`): `mx1.efwd.spaceship.net`, `mx2.efwd.spaceship.net`
+* `TXT` (`@`): `"v=spf1 include:spf.efwd.spaceship.net ~all"` *(Note: if adding an outbound SMTP relay later, append its `include:` inside this same `v=spf1` string rather than creating a second SPF record).*
 
-### B. 11 Individual Member Addresses
-| `@pylonpictures.com` Alias | Member Name | Destination Personal Email |
+### A. Active Studio & Departmental Team Emails (7 Live Rules)
+| Active `@pylonpictures.com` Email | Purpose / Team | Active Forwarding Recipients |
 | :--- | :--- | :--- |
-| `mason@pylonpictures.com` | Mason Cline | `Clinemase5@gmail.com` |
+| `contact@pylonpictures.com` | General Studio Inquiries (Website Footer) | `pylon.collective@gmail.com`, `mayachariandy@gmail.com`, `declanfmckenna@gmail.com`, `mcmurdo.jackson@gmail.com`, `clinemase5@gmail.com` |
+| `workwithus@pylonpictures.com` | `01 \| Client & Outreach` (Commercial / MV Inbound) | `pylon.collective@gmail.com`, `declanfmckenna@gmail.com`, `misanedema38@gmail.com`, `clinemase5@gmail.com`, `justin.c.tan2004@gmail.com` |
+| `finance@pylonpictures.com` | `02 \| Finance & Books` (Invoices, Receipts & Bidding) | `pylon.collective@gmail.com`, `dntiamoah8@gmail.com`, `justin.c.tan2004@gmail.com`, `mcmurdo.jackson@gmail.com`, `declanfmckenna@gmail.com` |
+| `ops@pylonpictures.com` | `03 \| Operations` (Call Sheets, Scheduling & Governance) | `pylon.collective@gmail.com`, `mayachariandy@gmail.com`, `justin.c.tan2004@gmail.com`, `mcmurdo.jackson@gmail.com` |
+| `tech@pylonpictures.com` | `04 \| Tech, Web & Post` | `pylon.collective@gmail.com`, `mcmurdo.jackson@gmail.com`, `dariob99@icloud.com`, `jessbinnss@gmail.com` |
+| `post@pylonpictures.com` | Post-Production Supervision | `mcmurdo.jackson@gmail.com`, `pylon.collective@gmail.com` |
+| `brand@pylonpictures.com` | `05 \| Brand & Strategy` (Press, Screenings & Socials) | `pylon.collective@gmail.com`, `jordanmkwong@gmail.com`, `clinemase5@gmail.com`, `daniel.fusco.04@gmail.com`, `jessbinnss@gmail.com` |
+
+### B. Active Individual Member Emails (11 Live Rules)
+| Active `@pylonpictures.com` Email | Member Name | Destination Personal Email |
+| :--- | :--- | :--- |
+| `mason@pylonpictures.com` | Mason Cline | `clinemase5@gmail.com` |
 | `jackson@pylonpictures.com` | Jackson McMurdo | `mcmurdo.jackson@gmail.com` |
-| `declan@pylonpictures.com` | Declan McKenna | `Declanfmckenna@gmail.com` |
+| `declan@pylonpictures.com` | Declan McKenna | `declanfmckenna@gmail.com` |
 | `maya@pylonpictures.com` | Maya Chariandy | `mayachariandy@gmail.com` |
 | `jordan@pylonpictures.com` | Jordan Wong | `jordanmkwong@gmail.com` |
 | `dario@pylonpictures.com` | Dario Butera | `dariob99@icloud.com` |
 | `dickson@pylonpictures.com` | Dickson Ntiamoah | `dntiamoah8@gmail.com` |
-| `jess@pylonpictures.com` *(+ `jessica@`)* | Jessica Binns | `jessbinnss@gmail.com` |
+| `jess@pylonpictures.com` | Jessica Binns | `jessbinnss@gmail.com` |
 | `daniel@pylonpictures.com` | Daniel Fusco | `daniel.fusco.04@gmail.com` |
 | `misan@pylonpictures.com` | Misan Edema | `misanedema38@gmail.com` |
 | `justin@pylonpictures.com` | Justin Tan | `justin.c.tan2004@gmail.com` |
