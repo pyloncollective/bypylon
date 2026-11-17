@@ -6,7 +6,7 @@
 **Secondary / Redirect Domains:** `bypylon.com` (Spaceship, exp Oct 24, 2027 — 301 Redirect), `pyloncollective.com` (Squarespace legacy, exp Sep 2027)  
 **Cloud Storage & AI Hub (10 Months Remaining):** `pylon.collective@gmail.com` (2 TB Google Drive + Google AI Pro + Master Calendars)  
 **Target Web Hosting:** GitHub Pages ($0/mo, Automated Let's Encrypt SSL — HTTPS Enforced)  
-**Email Stack (Next 10 Months):** Spaceship Free Domain Email Forwarding (Inbound) + Free DKIM/SPF Outbound SMTP Relay (Gmail *"Send mail as"*)
+**Email Stack (Next 10 Months):** Spaceship Free Domain Email Forwarding (Inbound) + Resend Free SMTP Relay (Outbound Gmail *"Send mail as"*, `3,000 emails/mo` free)
 
 ---
 
@@ -35,7 +35,7 @@ A domain can only have **one** set of `MX` records handling incoming mail:
 * **Do NOT enable Spacemail and Spaceship Domain Email Forwarding at the same time on `pylonpictures.com`** — turning on Spacemail (`mx1/mx2.spacemail.com`) disables Spaceship's free 100-rule Domain Email Forwarding, and Spacemail aliases only drop into one shared inbox rather than forwarding to 11 separate personal Gmails.
 * **Cleanest $0/mo Architecture:**
   1. **Inbound (`MX`):** Use **Spaceship Domain Email Forwarding** (*Spaceship -> Domain Manager -> `pylonpictures.com` -> Email Forwarding*) — free, up to 100 rules, routes all 11 `<firstname>@` and all 6 studio/team addresses directly to members' personal inboxes.
-  2. **Outbound Sending (`TXT`/`CNAME` Only — Zero `MX` Conflict):** Connect a free transactional SMTP relay (**SMTP2GO** free tier: 1,000 emails/mo free, or **Brevo** free tier: 300 emails/day free). It adds only `DKIM`/`SPF` records in DNS (never touches `MX` records) and lets `pylon.collective@gmail.com` or any team lead add **unlimited `@pylonpictures.com` sending names** (`contact@`, `workwithus@`, `ops@`, `finance@`, `tech@`, `brand@`, `jackson@`, etc.) in **Gmail -> Settings -> Accounts and Import -> Send mail as** for **$0/mo**.
+  2. **Outbound Sending (`resend._domainkey` / `send` / `rsend` — Zero `@` `MX` Conflict):** Verified via **Resend** (`smtp.resend.com`, Port `465` SSL, Username `resend` — full member setup in [`docs/EMAIL_SETUP_RUNBOOK.md`](file:///Users/jacksonmcmurdo/Desktop/Pylon/docs/EMAIL_SETUP_RUNBOOK.md)). Because Resend scopes its records to `resend._domainkey`, `send`, and `rsend`, your root `@` Spaceship Forwarding `MX` and `SPF` records stay completely untouched, and all 11 members + 6 studio/team aliases can send authenticated `@pylonpictures.com` emails for **$0/mo**.
 
 ---
 
