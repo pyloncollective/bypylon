@@ -1,18 +1,18 @@
-# pylonpictures.com — Master DNS, GitHub Pages & Google Workspace Configuration
+# pylonpictures.com — Master DNS, GitHub Pages & Email Routing Configuration
 
 **Primary Domain:** `pylonpictures.com`  
-**Registrar:** Spaceship (Namecheap Inc.)  
+**Registrar:** Spaceship (Namecheap Inc.) — Invoice `QR-202611170002831` (`CA$13.84`)  
 **Registration Date:** November 16, 2026 (Active through Nov 17, 2027)  
 **Secondary / Redirect Domains:** `bypylon.com` (Spaceship, exp Oct 24, 2027 — 301 Redirect), `pyloncollective.com` (Squarespace legacy, exp Sep 2027)  
-**Owner / Technical Lead:** Jackson McMurdo (`mcmurdo.jackson@gmail.com`)  
-**Target Hosting:** GitHub Pages ($0/mo, Automated Let's Encrypt SSL)  
-**Email Infrastructure:** Google Workspace Business Starter (1 Admin Seat + Free Google Groups Routing)
+**Cloud Storage & AI Hub (10 Months Remaining):** `pylon.collective@gmail.com` (2 TB Google Drive + Google AI Pro + Master Calendars)  
+**Target Web Hosting:** GitHub Pages ($0/mo, Automated Let's Encrypt SSL — HTTPS Enforced)  
+**Email Stack (Next 10 Months):** Spaceship Free Domain Email Forwarding (Inbound) + Free DKIM/SPF Outbound SMTP Relay (Gmail *"Send mail as"*)
 
 ---
 
 ## 1. GitHub Pages DNS Records (Spaceship -> Advanced DNS)
 
-Verified live on `launch1.spaceship.net` / `launch2.spaceship.net`:
+Verified live with Let's Encrypt SSL active (`https://pylonpictures.com`):
 
 ### Apex Domain (`A` Records)
 | Type | Host / Name | Value / Points To | TTL | Status |
@@ -25,38 +25,34 @@ Verified live on `launch1.spaceship.net` / `launch2.spaceship.net`:
 ### Subdomain (`CNAME` Record)
 | Type | Host / Name | Value / Points To | TTL | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| **CNAME** | `www` | `pylonpictures.github.io` | Automatic / 30m | Rename GitHub account `pyloncollective` -> `pylonpictures` so username matches 1:1 |
+| **CNAME** | `www` | `pylonpictures.github.io` | Automatic / 30m | Live (rename GitHub account `pyloncollective` -> `pylonpictures` so username matches 1:1) |
 
 ---
 
-## 2. Google Workspace DNS Records (Spaceship -> Advanced DNS)
+## 2. Important MX Rule: Spaceship Forwarding vs. Spacemail
 
-Add these records alongside the GitHub Pages `A` and `CNAME` records (do **not** delete the four `185.199.xxx.153` `A` records):
-
-| Type | Host / Name | Value / Points To | Priority | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| **TXT** | `@` | `google-site-verification=<token>` | — | Google Workspace domain ownership verification |
-| **MX** | `@` | `smtp.google.com` | `1` | Routes all `@pylonpictures.com` inbound mail to Google Workspace |
-| **TXT** | `@` | `v=spf1 include:_spf.google.com ~all` | — | SPF anti-spoofing (keeps outbound emails out of spam) |
-| **TXT** | `google._domainkey` | `v=DKIM1; k=rsa; p=<generated-in-admin>` | — | Generate inside `admin.google.com` -> Apps -> Gmail -> Authenticate email |
-| **TXT** | `_dmarc` | `v=DMARC1; p=none; rua=mailto:admin@pylonpictures.com` | — | Basic DMARC alignment required by Gmail/Yahoo |
+A domain can only have **one** set of `MX` records handling incoming mail:
+* **Do NOT enable Spacemail and Spaceship Domain Email Forwarding at the same time on `pylonpictures.com`** — turning on Spacemail (`mx1/mx2.spacemail.com`) disables Spaceship's free 100-rule Domain Email Forwarding, and Spacemail aliases only drop into one shared inbox rather than forwarding to 11 separate personal Gmails.
+* **Cleanest $0/mo Architecture:**
+  1. **Inbound (`MX`):** Use **Spaceship Domain Email Forwarding** (*Spaceship -> Domain Manager -> `pylonpictures.com` -> Email Forwarding*) — free, up to 100 rules, routes all 11 `<firstname>@` and all 6 studio/team addresses directly to members' personal inboxes.
+  2. **Outbound Sending (`TXT`/`CNAME` Only — Zero `MX` Conflict):** Connect a free transactional SMTP relay (**SMTP2GO** free tier: 1,000 emails/mo free, or **Brevo** free tier: 300 emails/day free). It adds only `DKIM`/`SPF` records in DNS (never touches `MX` records) and lets `pylon.collective@gmail.com` or any team lead add **unlimited `@pylonpictures.com` sending names** (`contact@`, `workwithus@`, `ops@`, `finance@`, `tech@`, `brand@`, `jackson@`, etc.) in **Gmail -> Settings -> Accounts and Import -> Send mail as** for **$0/mo**.
 
 ---
 
-## 3. Single-Seat Google Workspace + Google Groups Architecture
+## 3. Copy-Paste Forwarding Directory (Spaceship -> Email Forwarding)
 
-1. **Create Only 1 Paid Seat:** Use `admin@pylonpictures.com` (or `studio@pylonpictures.com`) as the single paid Business Starter license (`~$11 CAD/mo`).
-2. **Enable External Posting on Every Group (Critical):**
-   * In `admin.google.com` -> **Directory -> Groups -> Create group**:
-   * Under **Access settings**, check **"External -> Anyone on the web -> Publish posts"** AND **"Allow members outside your organization"**. *(If "Anyone on the web -> Publish posts" is left unchecked, outside clients emailing `@pylonpictures.com` will get a bounce error).*
+### A. Studio & 5 Departmental Team Addresses
+| `@pylonpictures.com` Alias | Purpose / Team | Forward To |
+| :--- | :--- | :--- |
+| `contact@pylonpictures.com` | General Studio Inquiries (Website Footer) | `pylon.collective@gmail.com`, `mayachariandy@gmail.com`, `Declanfmckenna@gmail.com`, `mcmurdo.jackson@gmail.com` |
+| `workwithus@pylonpictures.com` *(or `outreach@`)* | `01 \| Client & Outreach` (Commercial / MV Bids) | `Declanfmckenna@gmail.com`, `misanedema38@gmail.com`, `Clinemase5@gmail.com`, `justin.c.tan2004@gmail.com` |
+| `finance@pylonpictures.com` | `02 \| Finance & Books` (Invoices & Receipts) | `dntiamoah8@gmail.com`, `justin.c.tan2004@gmail.com`, `mcmurdo.jackson@gmail.com`, `Declanfmckenna@gmail.com` |
+| `ops@pylonpictures.com` | `03 \| Operations` (Call Sheets & Scheduling) | `mayachariandy@gmail.com`, `justin.c.tan2004@gmail.com`, `mcmurdo.jackson@gmail.com` |
+| `tech@pylonpictures.com` *(or `post@`)* | `04 \| Tech, Web & Post` | `mcmurdo.jackson@gmail.com`, `dariob99@icloud.com`, `jessbinnss@gmail.com` |
+| `brand@pylonpictures.com` | `05 \| Brand & Strategy` (Press, Events & Socials) | `jordanmkwong@gmail.com`, `Clinemase5@gmail.com`, `daniel.fusco.04@gmail.com`, `jessbinnss@gmail.com` |
 
-### Shared Studio Inboxes (Google Groups)
-* `contact@pylonpictures.com` -> General inquiries (`03 | Operations` + `01 | Client & Outreach`: Maya, Justin, Declan, Misan, Mason, Jackson)
-* `workwithus@pylonpictures.com` -> Commercial & music video inbound (`01 | Client & Outreach`: Declan, Misan, Mason, Justin)
-
-### 11-Member `@pylonpictures.com` Routing Directory (Copy-Paste Ready)
-
-| Group Email (`@pylonpictures.com`) | Member Name | Destination Personal Email |
+### B. 11 Individual Member Addresses
+| `@pylonpictures.com` Alias | Member Name | Destination Personal Email |
 | :--- | :--- | :--- |
 | `mason@pylonpictures.com` | Mason Cline | `Clinemase5@gmail.com` |
 | `jackson@pylonpictures.com` | Jackson McMurdo | `mcmurdo.jackson@gmail.com` |
@@ -65,9 +61,7 @@ Add these records alongside the GitHub Pages `A` and `CNAME` records (do **not**
 | `jordan@pylonpictures.com` | Jordan Wong | `jordanmkwong@gmail.com` |
 | `dario@pylonpictures.com` | Dario Butera | `dariob99@icloud.com` |
 | `dickson@pylonpictures.com` | Dickson Ntiamoah | `dntiamoah8@gmail.com` |
-| `jess@pylonpictures.com` *(alias `jessica@`)* | Jessica Binns | `jessbinnss@gmail.com` |
+| `jess@pylonpictures.com` *(+ `jessica@`)* | Jessica Binns | `jessbinnss@gmail.com` |
 | `daniel@pylonpictures.com` | Daniel Fusco | `daniel.fusco.04@gmail.com` |
 | `misan@pylonpictures.com` | Misan Edema | `misanedema38@gmail.com` |
 | `justin@pylonpictures.com` | Justin Tan | `justin.c.tan2004@gmail.com` |
-
-*(Optional: each member can also configure Gmail "Send mail as" via SMTP or reply directly once added to their personal group).*

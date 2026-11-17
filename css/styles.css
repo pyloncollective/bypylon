@@ -456,12 +456,30 @@ body.page-roster { background: var(--ink); color: var(--white); }
 /* Whole row is the click target */
 .roster-row { padding: 0; }
 .roster-link {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
   width: 100%;
   padding: 0.06em 20px 0;
   color: inherit;
   text-decoration: none;
   cursor: pointer;
+}
+.roster-craft {
+  font-family: "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.roster-row:hover .roster-craft,
+.roster-row:active .roster-craft,
+.roster-row:focus-within .roster-craft {
+  color: var(--ink);
 }
 .roster-link:focus-visible { outline: 2px solid var(--orange); outline-offset: -2px; }
 .roster-row:focus-within {
@@ -470,7 +488,7 @@ body.page-roster { background: var(--ink); color: var(--white); }
 }
 
 /* --------------------------------------------------------------------------
-   PERSON PAGE (placeholder — built out per member later)
+   PERSON PAGE (standardized member profile)
    -------------------------------------------------------------------------- */
 
 .person { padding: 120px 20px 80px; min-height: 100vh; }
@@ -502,11 +520,53 @@ body.page-roster { background: var(--ink); color: var(--white); }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: var(--orange);
+}
+
+.person-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 44px;
+  padding: 24px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.person-meta-block h2 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 8px;
+}
+
+.person-meta-block p,
+.person-meta-block a {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.person-meta-block a:hover {
+  color: var(--orange);
+}
+
+.person-meta-block .ext-link {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .person-placeholder {
-  margin-top: 60px;
-  height: 50vh;
+  margin-top: 48px;
+  height: 44vh;
   display: grid;
   place-items: center;
   border: 1px dashed rgba(255, 255, 255, 0.25);
@@ -525,9 +585,15 @@ body.page-roster { background: var(--ink); color: var(--white); }
   border-bottom-color: var(--white);
 }
 
+@media (max-width: 980px) {
+  .roster-craft { display: none; }
+  .person-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 760px) {
   .roster { padding-top: 96px; }
   .roster-name { white-space: normal; }
+  .person-meta { grid-template-columns: 1fr; gap: 18px; }
 }
 
 /* --------------------------------------------------------------------------
