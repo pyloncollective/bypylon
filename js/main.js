@@ -101,15 +101,8 @@
   const params = new URLSearchParams(location.search);
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Wait for webfonts + original logo so the flash never shows fallback type.
-  const ready = Promise.all([
-    document.fonts ? document.fonts.ready : Promise.resolve(),
-    new Promise((r) => {
-      const img = new Image();
-      img.onload = img.onerror = r;
-      img.src = 'assets/logo.png';
-    }),
-  ]);
+  // Wait for webfonts so the flash never shows fallback type.
+  const ready = document.fonts ? document.fonts.ready : Promise.resolve();
 
   ready.then(() => {
     if (params.has('skip') || params.has('role') || location.hash || reduced) skip();
