@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backstage Roster Builder — PYLON PICTURES</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       CREW LOGIN GATE
+       ============================================================ -->
+  <section class="gate" id="loginGate">
+    <div class="pass-card">
+      <div class="pass-stripes" aria-hidden="true"></div>
+      <div class="pass-head mono">
+        <span>Pylon Pictures · V1 Site Build</span>
+        <span class="pass-badge">Crew Access</span>
+      </div>
+      <div class="pass-body">
+        <h1 class="pass-title">Backstage<br>Roster Builder</h1>
+        <p class="pass-sub">Sign in with your first name and personal crew pass to shape your official <strong>pylonpictures.com</strong> portfolio page. Save step-by-step anytime.</p>
+
+        <form class="pass-form" id="loginForm" autocomplete="on">
+          <div class="field">
+            <label for="loginUser">Crew Username <span class="hint-inline">Your first name</span></label>
+            <input class="input" id="loginUser" name="username" type="text" placeholder="e.g. mason" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="loginPass">Crew Passcode</label>
+            <div class="pw-wrap">
+              <input class="input" id="loginPass" name="password" type="password" placeholder="word-word-00" autocomplete="current-password" required>
+              <button type="button" class="pw-toggle" id="pwToggle">Show</button>
+            </div>
+          </div>
+          <div class="gate-error" id="loginError" hidden>Incorrect first name or crew passcode. Check your DM from Jackson.</div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Enter Backstage &rarr;</button>
+        </form>
+      </div>
+      <div class="pass-foot mono">
+        <a href="../index.html?skip">&larr; pylonpictures.com</a>
+        <span>11 / 11 Ensemble</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MAIN BUILDER WORKSPACE
+       ============================================================ -->
+  <div class="portal" id="portalApp" hidden>
+    <header class="topbar">
+      <div class="topbar-left">
+        <a class="brand-mark" href="../index.html?skip">PYLON<span>.</span>BACKSTAGE</a>
+        <span class="crew-chip mono" id="activeCrewChip">—</span>
+        <select class="admin-switcher" id="adminMemberSwitch" title="Admin: Preview/Edit Member" hidden></select>
+        <span class="save-status mono" id="saveStatus">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Ready</span>
+        </span>
+      </div>
+      <div class="topbar-right">
+        <button type="button" class="btn btn-sm" id="togglePreviewBtn">Live Page Preview</button>
+        <button type="button" class="btn btn-sm" id="exportJsonBtn" title="Download backup JSON">Export JSON</button>
+        <button type="button" class="btn btn-sm btn-primary" id="syncNowBtn">Save &amp; Sync</button>
+        <button type="button" class="btn btn-sm" id="logoutBtn">Log Out</button>
+      </div>
+    </header>
+
+    <div class="workspace with-preview" id="workspaceGrid">
+      <!-- LEFT STEP RAIL -->
+      <aside class="rail">
+        <div class="progress-box">
+          <div class="progress-top mono">
+            <span>Page Readiness</span>
+            <strong id="readinessPct">0%</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="readinessFill"></div>
+          </div>
+        </div>
+
+        <ul class="step-nav" id="stepNav"></ul>
+
+        <div class="rail-note">
+          Fill out one section or all seven — every edit saves automatically in your browser and syncs to the <strong>04 | Tech &amp; Web</strong> build sheet whenever you hit <strong>Save &amp; Sync</strong>.
+        </div>
+      </aside>
+
+      <!-- CENTER STEP STAGE -->
+      <main class="stage">
+        <div class="step-header">
+          <div class="step-kicker mono" id="stepKicker">Step 01 of 07</div>
+          <h2 class="step-title" id="stepTitle">—</h2>
+          <p class="step-desc" id="stepDesc">—</p>
+        </div>
+
+        <div class="form-stack" id="stepBody"></div>
+
+        <div class="step-footer">
+          <button type="button" class="btn" id="prevStepBtn">&larr; Previous</button>
+          <div class="step-footer-right">
+            <button type="button" class="btn" id="saveStepOnlyBtn">Save Step Draft</button>
+            <button type="button" class="btn btn-primary" id="nextStepBtn">Save &amp; Next Step &rarr;</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT LIVE PROFILE PREVIEW -->
+      <aside class="preview-pane" id="previewPane">
+        <div class="preview-head mono">
+          <span>Live Roster Preview</span>
+          <a id="liveSiteLink" href="../roster/jackson-mcmurdo.html" target="_blank" rel="noopener" style="color:var(--orange); text-decoration:none;">Current Live Page &nearr;</a>
+        </div>
+
+        <div class="mock-page">
+          <div class="mock-url mono" id="mockUrl">pylonpictures.com/roster/—</div>
+          <div class="mock-name" id="mockName">—</div>
+          <div class="mock-headline" id="mockHeadline">—</div>
+          <div class="mock-logline" id="mockLogline" hidden></div>
+          <div class="mock-bio" id="mockBio">Your artist bio will appear right here as you type...</div>
+
+          <div class="mock-grid">
+            <div class="mock-cell">
+              <h4 class="mono">Primary Craft</h4>
+              <p id="mockPrimary">—</p>
+            </div>
+            <div class="mock-cell">
+              <h4 class="mono">Additional</h4>
+              <p id="mockSecondary">—</p>
+            </div>
+            <div class="mock-cell">
+              <h4 class="mono">Kit / Tools</h4>
+              <p id="mockGear">—</p>
+            </div>
+            <div class="mock-cell">
+              <h4 class="mono">Direct</h4>
+              <p id="mockContact">—</p>
+            </div>
+          </div>
+
+          <div class="mock-links" id="mockLinks"></div>
+
+          <div class="mock-works">
+            <div class="mock-works-title mono">Featured Credits (<span id="mockWorksCount">0</span>)</div>
+            <div id="mockWorksList"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Saved</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
