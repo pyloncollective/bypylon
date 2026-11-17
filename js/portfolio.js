@@ -531,8 +531,15 @@
       filmFrame.innerHTML = `<iframe src="${src}" title="${esc(proj.title)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
     } else if (proj.videoUrl) {
       filmFrame.innerHTML = `<video src="${esc(proj.videoUrl)}" ${proj.still ? `poster="${esc(proj.still)}"` : ''} controls autoplay playsinline></video>`;
-    } else if (proj.still) {
-      filmFrame.innerHTML = `<img src="${esc(proj.still)}" alt="${esc(proj.title)}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    } else {
+      filmFrame.innerHTML = `
+        <div class="film__placeholder">
+          ${proj.still ? `<img src="${esc(proj.still)}" alt="">` : ''}
+          <div class="film__placeholder-copy">
+            <strong>${esc(proj.placeholderNote || 'Selected Reel & Project Cut — Coming Soon')}</strong>
+            <span>${esc(DATA.name)} &middot; Pylon Pictures</span>
+          </div>
+        </div>`;
     }
 
     document.title = `${proj.title} — ${DATA.name} — PYLON PICTURES`;

@@ -1953,6 +1953,12 @@
     document.getElementById('portalApp').hidden = false;
     document.getElementById('activeCrewChip').textContent = CREW[activeMemberKey].name;
 
+    // On mobile/tablet (< 1240px), keep drawer closed initially so form is unobstructed
+    if (window.innerWidth <= 1240) {
+      document.getElementById('previewPane').hidden = true;
+      document.getElementById('workspaceGrid').classList.remove('with-preview');
+    }
+
     const adminSel = document.getElementById('adminMemberSwitch');
     const expHtmlBtn = document.getElementById('exportHtmlBtn');
     if (CREW[loggedInUser].isAdmin) {
