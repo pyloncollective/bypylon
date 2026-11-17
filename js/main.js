@@ -105,11 +105,21 @@
   const ready = document.fonts ? document.fonts.ready : Promise.resolve();
 
   ready.then(() => {
+    if (intro.classList.contains('is-done')) return; // already tapped to skip
     if (params.has('skip') || params.has('role') || location.hash || reduced) skip();
     else play();
   });
 
   if (replayBtn) replayBtn.addEventListener('click', play);
+
+  // Tap / click anywhere during the intro to skip it. Uses 'click' (fires
+  // after the full tap) on the intro overlay itself, so the tap can never
+  // fall through and activate a link on the site underneath.
+  intro.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!intro.classList.contains('is-done')) skip();
+  });
   document.addEventListener('keydown', (e) => {
     if (e.target.closest('input, textarea, select, button, label')) return;
     if (e.key === 'r' || e.key === 'R') play();

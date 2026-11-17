@@ -34,7 +34,8 @@ body.is-loading { overflow: hidden; }
   inset: 0;
   z-index: 100;
   background: var(--ink);
-  pointer-events: none;
+  pointer-events: auto; /* catches the tap-to-skip (no visual cue, by design) */
+  -webkit-tap-highlight-color: transparent;
   overflow: hidden;
 }
 
