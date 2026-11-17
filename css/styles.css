@@ -482,7 +482,10 @@ body.page-roster { background: var(--ink); color: var(--white); }
   padding: 0.06em 20px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   font-family: "Archivo Black", sans-serif;
-  font-size: clamp(44px, 8.4vw, 160px);
+  /* Sized so the longest name + its craft line always fit on one row.
+     ~11.4em = widest current name; 380px = gutters + gap + craft column.
+     --roster-fit is a JS safety net (roster.js) for any future longer name. */
+  font-size: calc(clamp(36px, (100vw - 380px) / 11.4, 150px) * var(--roster-fit, 1));
   line-height: 0.92;
   letter-spacing: -0.035em;
   text-transform: uppercase;
@@ -491,7 +494,7 @@ body.page-roster { background: var(--ink); color: var(--white); }
   cursor: default;
 }
 
-.roster-name { white-space: nowrap; }
+.roster-name { white-space: nowrap; min-width: 0; }
 
 /* Whole row is the click target */
 .roster-row { padding: 0; }
@@ -656,7 +659,15 @@ body.page-roster { background: var(--ink); color: var(--white); }
 }
 
 @media (max-width: 980px) {
-  .roster-craft { display: none; }
+  /* Tablet: stack the craft line under the name so it's never squeezed out */
+  .roster-row { font-size: calc(clamp(32px, (100vw - 48px) / 11.4, 80px) * var(--roster-fit, 1)); }
+  .roster-link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px 20px 14px;
+  }
+  .roster-craft { white-space: normal; }
   .person-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

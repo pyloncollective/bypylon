@@ -13,17 +13,8 @@
   // Google Apps Script Web App URL tied to Sheet 11UP6yDEN0-DvDxrsiEeVINW_E6orUm4Q70mYz9zKlOo
   const CLOUD_ENDPOINT = '';
 
-  const FALLBACK_STILLS = [
-    '../assets/images/still-01.jpg',
-    '../assets/images/still-02.jpg',
-    '../assets/images/still-03.jpg',
-    '../assets/images/still-04.jpg',
-    '../assets/images/still-05.jpg',
-    '../assets/images/still-06.jpg',
-    '../assets/images/still-08.jpg',
-    '../assets/images/still-09.jpg',
-    '../assets/images/still-10.jpg'
-  ];
+  // No stock/fallback imagery: a member's page only shows stills, posters, or
+  // reels they have explicitly chosen themselves. Empty = clean black screen.
 
   const CREW = {
     jackson: {
@@ -588,11 +579,11 @@
     return parts.join(' · ') || 'Film';
   }
 
-  function stillForProject(p, idx) {
+  function stillForProject(p) {
     if (p && p.stillPreviewUrl && p.stillPreviewUrl.trim()) {
       return p.stillPreviewUrl.trim();
     }
-    return FALLBACK_STILLS[idx % FALLBACK_STILLS.length];
+    return '';
   }
 
   /* ------------------------------------------------------------------------
@@ -659,9 +650,9 @@
     if (filled.length) return filled;
     // Sample preview rows when member hasn't added projects yet so they see how the theme works
     return [
-      { title: 'Your First Credit Title', category: 'Commercial / Spec', clientOrArtist: 'Pylon Pictures', year: '2026', role: state?.primaryCraft?.split(',')[0] || 'Lead Role', watchUrl: '', stillPreviewUrl: FALLBACK_STILLS[0], _sample: true },
-      { title: 'Second Selected Project', category: 'Music Video', clientOrArtist: 'Artist Name', year: '2026', role: 'Your Credit Line', watchUrl: '', stillPreviewUrl: FALLBACK_STILLS[1], _sample: true },
-      { title: 'Third Narrative or Spot', category: 'Narrative Short', clientOrArtist: 'Festival Selection', year: '2025', role: 'Your Credit Line', watchUrl: '', stillPreviewUrl: FALLBACK_STILLS[2], _sample: true }
+      { title: 'Your First Credit Title', category: 'Commercial / Spec', clientOrArtist: 'Pylon Pictures', year: '2026', role: state?.primaryCraft?.split(',')[0] || 'Lead Role', watchUrl: '', stillPreviewUrl: '', _sample: true },
+      { title: 'Second Selected Project', category: 'Music Video', clientOrArtist: 'Artist Name', year: '2026', role: 'Your Credit Line', watchUrl: '', stillPreviewUrl: '', _sample: true },
+      { title: 'Third Narrative or Spot', category: 'Narrative Short', clientOrArtist: 'Festival Selection', year: '2025', role: 'Your Credit Line', watchUrl: '', stillPreviewUrl: '', _sample: true }
     ];
   }
 
@@ -672,14 +663,33 @@
 
     const projs = getPreviewProjects();
     const parsedLoop = parseWatchSource(state.reelUrl || state.heroSourceUrl || '');
-    const customMp4 = parsedLoop && parsedLoop.type === 'mp4' ? parsedLoop.url : '../assets/videos/home-reel-colour.mp4';
-    const customPoster = (state.heroPosterUrl && state.heroPosterUrl.trim()) || '../assets/images/home-reel-colour-poster.jpg';
+    const customMp4 = parsedLoop && parsedLoop.type === 'mp4' ? parsedLoop.url : '';
+    const customPoster = (state.heroPosterUrl && state.heroPosterUrl.trim()) || '';
+
+    const setStill = (src) => {
+      if (src) {
+        if (still.getAttribute('src') !== src) still.src = src;
+        still.style.visibility = '';
+      } else {
+        still.removeAttribute('src');
+        still.style.visibility = 'hidden';
+      }
+    };
 
     if (previewView === 'home' && previewHoveredIdx >= 0 && projs[previewHoveredIdx]) {
-      still.src = stillForProject(projs[previewHoveredIdx], previewHoveredIdx);
+      setStill(stillForProject(projs[previewHoveredIdx]));
       vid.classList.add('is-hidden');
     } else {
-      still.src = customPoster;
+      setStill(customPoster);
+      if (!customMp4) {
+        if (vid.getAttribute('src')) {
+          vid.pause();
+          vid.removeAttribute('src');
+          vid.load();
+        }
+        vid.classList.add('is-hidden');
+        return;
+      }
       if (vid.getAttribute('src') !== customMp4) {
         vid.setAttribute('src', customMp4);
         vid.load();
@@ -711,10 +721,12 @@
     } else if (src && src.type === 'vimeo') {
       frame.innerHTML = `<iframe src="https://player.vimeo.com/video/${encodeURIComponent(src.id)}?autoplay=1&title=0&byline=0&portrait=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     } else if (src && src.type === 'mp4') {
-      frame.innerHTML = `<video src="${esc(src.url)}" poster="${esc(stillForProject(p, idx))}" controls autoplay playsinline></video>`;
+      const poster = stillForProject(p);
+      frame.innerHTML = `<video src="${esc(src.url)}" ${poster ? `poster="${esc(poster)}"` : ''} controls autoplay playsinline></video>`;
     } else {
+      const poster = stillForProject(p);
       frame.innerHTML = `
-        <img src="${esc(stillForProject(p, idx))}" alt="" style="opacity:0.45;">
+        ${poster ? `<img src="${esc(poster)}" alt="" style="opacity:0.45;">` : ''}
         <div class="cs-film-placeholder" style="position:absolute;">
           ${p.watchUrl ? `External Master Linked:<br><span style="color:var(--orange);">${esc(p.watchUrl.slice(0, 46))}...</span>` : 'Paste a YouTube, Vimeo, or MP4 Watch Link in Step 04 to play video right here'}
         </div>`;
@@ -1723,9 +1735,10 @@
           kind: formatKindLine(p),
           roles: p.role.trim() || state.headline,
           year: p.year.trim() || '2026',
-          still: p.stillPreviewUrl && !p.stillPreviewUrl.startsWith('data:')
+          // Only a still the member chose themselves — never a stock fallback
+          still: p.stillPreviewUrl && p.stillPreviewUrl.trim() && !p.stillPreviewUrl.startsWith('data:')
             ? p.stillPreviewUrl.trim()
-            : FALLBACK_STILLS[idx % FALLBACK_STILLS.length],
+            : undefined,
           focus: 0.45,
           shade: [0.54, 0.64]
         };
@@ -1745,10 +1758,11 @@
       formEndpoint: 'https://formspree.io/f/xrpzyngg',
       contactScopes: splitItems(state.contactScopes || state.primaryCraft),
       landing: {
-        previewMp4: parsedHero && parsedHero.type === 'mp4' ? parsedHero.url : '../assets/videos/home-reel-colour.mp4',
-        still: state.heroPosterUrl && !state.heroPosterUrl.startsWith('data:')
+        // Only the member's own reel / poster — no studio reel stand-in
+        previewMp4: parsedHero && parsedHero.type === 'mp4' ? parsedHero.url : undefined,
+        still: state.heroPosterUrl && state.heroPosterUrl.trim() && !state.heroPosterUrl.startsWith('data:')
           ? state.heroPosterUrl.trim()
-          : '../assets/images/home-reel-colour-poster.jpg',
+          : undefined,
         focus: 0.4,
         shade: [0.54, 0.64]
       },
