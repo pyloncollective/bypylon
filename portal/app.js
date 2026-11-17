@@ -57,7 +57,13 @@
           { id: 'j6', title: 'Between Friends — JAM!', category: 'Music Video', clientOrArtist: 'Live Music Video', year: '2025', banner: 'Personal / External Credit', role: 'Editing, Colour Grading, Motion Graphics & VFX', watchUrl: 'https://mukpost.com/portfolio-assets/videos/between-friends-jam-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/between-friends-jam.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
           { id: 'j7', title: 'I Am Because We Are — Hoop Dreams', category: 'Documentary', clientOrArtist: 'Documentary Short', year: '2025', banner: 'Personal / External Credit', role: 'Documentary Editing, Colour Grading & Sound Mix', watchUrl: 'https://mukpost.com/portfolio-assets/videos/hoop-dreams-doc-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/hoop-dreams.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
           { id: 'j8', title: 'Cerberus', category: 'Narrative Short', clientOrArtist: 'Dir. Johnny Tsatsos', year: '2026', banner: 'Personal / External Credit', role: 'Sound Design & Re-Recording Mix', watchUrl: 'https://mukpost.com/portfolio-assets/videos/cerberus-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/cerberus.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
-          { id: 'j9', title: 'Last Night', category: 'Narrative Short', clientOrArtist: '16mm Short · MDFF at TIFF', year: '2023', banner: 'Personal / External Credit', role: 'Edit, 16mm Colour Grading, Sound Design & Mix', watchUrl: 'https://mukpost.com/portfolio-assets/videos/last-night-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/last-night.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: 'MDFF at TIFF', featured: true }
+          { id: 'j9', title: 'Last Night', category: 'Narrative Short', clientOrArtist: '16mm Short · MDFF at TIFF', year: '2023', banner: 'Personal / External Credit', role: 'Edit, 16mm Colour Grading, Sound Design & Mix', watchUrl: 'https://mukpost.com/portfolio-assets/videos/last-night-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/last-night.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: 'MDFF at TIFF', featured: true },
+          { id: 'j10', title: 'Holy Vexation', category: 'Narrative Short', clientOrArtist: '16mm Short · Dir. Declan McKenna', year: '2025', banner: 'Pylon Production', role: 'Sound Editor', watchUrl: 'https://mukpost.com/portfolio-assets/videos/holy-vexation-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/holy-vexation.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'j11', title: 'Côté Ibis — Draft Night', category: 'Commercial / Spec', clientOrArtist: 'Dir. Mason Cline', year: '2025', banner: 'Pylon Production', role: 'Sound Design, Mix & ADR', watchUrl: 'https://mukpost.com/portfolio-assets/videos/draft-night.mp4', stillPreviewUrl: '../assets/images/jackson/draft-night.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'j12', title: 'insyt. — Toll', category: 'Music Video', clientOrArtist: 'Dir. Mason Cline & Jackson McMurdo', year: '2026', banner: 'Pylon Production', role: 'VFX, Colour Grading, Co-Editor, Title & Sound Design', watchUrl: 'https://www.youtube.com/watch?v=chQBG5lTCnM', stillPreviewUrl: '../assets/images/jackson/insyt-toll.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'j13', title: 'Kai Banks — Maze', category: 'Music Video', clientOrArtist: 'Dir. Mason Cline', year: '2025', banner: 'Pylon Production', role: 'Title Card Design', watchUrl: 'https://mukpost.com/portfolio-assets/videos/kai-banks-maze-1080p.mp4', stillPreviewUrl: '../assets/images/jackson/kai-banks-maze.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'j14', title: 'insyt. — Heal', category: 'Music Video', clientOrArtist: 'Dir. Mason Cline', year: '2026', banner: 'Pylon Production', role: 'Custom Title Card Design', watchUrl: 'https://www.youtube.com/watch?v=2i1VwJyLIs0', stillPreviewUrl: '../assets/images/jackson/insyt-heal.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'j15', title: 'insyt. — Puppet Strings', category: 'Music Video', clientOrArtist: 'Dir. Mason Cline', year: '2025', banner: 'Pylon Production', role: 'Title Design', watchUrl: 'https://www.youtube.com/watch?v=6GvYSWZT93s', stillPreviewUrl: '../assets/images/jackson/insyt-puppet-strings.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true }
         ]
       }
     },
@@ -68,12 +74,36 @@
       hash: 'b2374a01ef8081dbc4a08a46c4e942fd22e357e3ae2ebafc7898bdb4c4b2bb53',
       defaults: {
         headline: 'Director · Photographer · Writer',
-        infoSubtitle: 'Director & Writer · Pylon Pictures',
-        primaryCraft: 'Commercial & Music Video Direction, Photography, Screenwriting',
-        secondaryCraft: 'Location Scouting, Editorial, Camera Dept (AC), Producing',
-        contactScopes: 'Commercial Direction, Music Video, Narrative / Writing, Photography, Creative Treatment',
-        gear: '',
-        tags: ['Director', 'Cinematographer (DP)', 'Photography', 'Writer', 'Editor', 'Camera / AC']
+        infoSubtitle: 'Founder, Director, Cinematographer & Photographer · Pylon Pictures',
+        bio: "Mason Cline is a Toronto-based director, cinematographer, editor, and photographer specializing in music videos, commercial campaigns, short films, and analog visual arts. As founder of Pylon Pictures, he leads creative direction and treatments from initial concept through on-set execution and editorial cut.\n\nWorking across digital cinema, Super 8, 35mm, and 120mm medium-format film, his work pairs kinetic pacing with tactile, lived-in worldbuilding for artists and brands including insyt., Donat Jackson, ZOE, Kai Banks, Prettybxkay, REACH Collective, GBL, and Côté Ibis x New Era.",
+        primaryCraft: 'Commercial & Music Video Direction, 35mm & 120mm Film Photography, Offline Editorial, Screenwriting & Treatments, Super 8',
+        secondaryCraft: 'Cinematography (DP), Location Scouting, Creative Producing, Client & Brand Strategy',
+        contactScopes: 'Commercial Direction, Music Video Direction, 35mm / 120mm Photography, Cinematography (DP / Super 8), Editorial, Creative Treatment & Writing',
+        gear: 'Super 8, 35mm & 120mm Medium Format, Digital Cinema',
+        tags: ['Director', 'Cinematographer (DP)', 'Photography', 'Writer', 'Editor', 'Camera / AC'],
+        personalSiteUrl: 'https://masoncline.ca',
+        personalSiteLabel: '35mm Photo Archive (masoncline.ca)',
+        instagramUrl: 'https://www.instagram.com/mason.clinee/',
+        otherLinks: 'https://www.instagram.com/planetbogus/',
+        reelUrl: '../assets/videos/mason-reel-loop.mp4',
+        heroPosterUrl: '../assets/images/mason/opening-poster.jpg',
+        awardsAndPress: 'Thiếu, Nữ — Official Festival Selection\nREACH Collective — 35mm Fashion Campaign\nPATHFINDER (2026) — 35mm Press Portraits\nGBL & Côté Ibis x New Era Campaigns',
+        projects: [
+          { id: 'm1', title: 'insyt. — 360°', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2026', banner: 'Pylon Production', role: 'Director & Editor', watchUrl: 'https://www.youtube.com/watch?v=CKdqD851gQ0', stillPreviewUrl: '../assets/images/mason/insyt-360.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm2', title: 'Donat Jackson — sweartogod!', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2026', banner: 'Pylon Production', role: 'Director', watchUrl: 'https://www.youtube.com/watch?v=a3y5_lFqbsE', stillPreviewUrl: '../assets/images/jackson/sweartogod.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm3', title: 'insyt. — Heal (feat. Jay Versace & Mileena)', category: 'Music Video', clientOrArtist: 'Co-Dir. Declan McKenna', year: '2026', banner: 'Pylon Production', role: 'Director & Super 8', watchUrl: 'https://youtu.be/2i1VwJyLIs0', stillPreviewUrl: '../assets/images/mason/insyt-heal.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm4', title: 'Donat Jackson — needmoretime!', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2026', banner: 'Pylon Production', role: 'Director & Editor', watchUrl: 'https://www.youtube.com/watch?v=m3GzM8sJ_V8', stillPreviewUrl: '../assets/images/mason/needmoretime.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm5', title: 'insyt. — Toll', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2026', banner: 'Pylon Production', role: 'Director, Editor & Super 8', watchUrl: 'https://www.youtube.com/watch?v=chQBG5lTCnM', stillPreviewUrl: '../assets/images/mason/insyt-toll.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm6', title: 'ZOE — Attitude & Motion', category: 'Music Video', clientOrArtist: 'Co-Dir. Maya Chariandy', year: '2025', banner: 'Pylon Production', role: 'Director, DP, Edit & Colour', watchUrl: 'https://youtu.be/EfRm28PLvKA', stillPreviewUrl: '../assets/images/mason/zoe-attitude-motion.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm7', title: 'Kai Banks — Maze', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2025', banner: 'Pylon Production', role: 'Director & Editor', watchUrl: 'https://youtu.be/PFcnSxjB-KM', stillPreviewUrl: '../assets/images/mason/kai-banks-maze.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm8', title: 'Thiếu, Nữ', category: 'Narrative Short', clientOrArtist: 'Dir. Thuỵ Huỳnh Thái', year: '2025', banner: 'Pylon Production', role: 'Director of Photography, Colour & 35mm Photo', watchUrl: 'https://youtu.be/66nTpR10RQQ', stillPreviewUrl: '../assets/images/mason/thieu-nu.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: 'Official Festival Selection', featured: true },
+          { id: 'm9', title: 'insyt. — Puppet Strings', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2025', banner: 'Pylon Production', role: 'Director & Editor', watchUrl: 'https://youtu.be/6GvYSWZT93s', stillPreviewUrl: '../assets/images/mason/insyt-puppet-strings.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm10', title: 'Prettybxkay — 4nicate', category: 'Music Video', clientOrArtist: 'Pylon Pictures', year: '2025', banner: 'Pylon Production', role: 'Director, Editor & Super 8', watchUrl: 'https://www.youtube.com/watch?v=ZTq6Xg301Eg', stillPreviewUrl: '../assets/images/mason/prettybxkay-4nicate.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm11', title: 'GBL — Gangsta is Gorgeous', category: 'Commercial / Spec', clientOrArtist: 'Khaki Set Campaign', year: '2025', banner: 'Pylon Production', role: 'Director, DP, Editor & Colour', watchUrl: 'https://www.instagram.com/p/DP7EbUoEogg/', stillPreviewUrl: '../assets/images/mason/gbl-campaign.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm12', title: 'Côté Ibis — Draft Day (New Era)', category: 'Commercial / Spec', clientOrArtist: 'Pylon Pictures', year: '2025', banner: 'Pylon Production', role: 'Director & Editor', watchUrl: 'https://mukpost.com/portfolio-assets/videos/draft-night.mp4', stillPreviewUrl: '../assets/images/mason/cote-ibis-draft-day.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm13', title: 'REACH Collective — 35mm Campaign', category: 'Photography Series', clientOrArtist: '35mm Film Campaign', year: '2025', banner: 'Pylon Production', role: 'Photographer & Creative Direction', watchUrl: 'https://masoncline.ca', stillPreviewUrl: '../assets/images/mason/reach-04.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true },
+          { id: 'm14', title: 'PATHFINDER — 35mm Portraits', category: 'Photography Series', clientOrArtist: 'Documentary Press Series', year: '2026', banner: 'Pylon Production', role: '35mm Photographer', watchUrl: 'https://masoncline.ca', stillPreviewUrl: '../assets/images/mason/pathfinder-04.jpg', stillsDriveUrl: '', hoverTimecode: '', laurels: '', featured: true }
+        ]
       }
     },
     dario: {
@@ -398,13 +428,26 @@
       const raw = localStorage.getItem(STORAGE_PREFIX + memberKey);
       if (!raw) return base;
       const parsed = JSON.parse(raw);
-      return {
+      const hasFilledProjects =
+        Array.isArray(parsed.projects) &&
+        parsed.projects.some((p) => p && p.title && p.title.trim());
+
+      const merged = {
         ...base,
         ...parsed,
-        projects: Array.isArray(parsed.projects) && parsed.projects.length
+        projects: hasFilledProjects
           ? parsed.projects.map((p) => ({ stillPreviewUrl: '', ...p }))
           : base.projects
       };
+
+      // Backfill live defaults if an older blank draft had empty strings
+      ['bio', 'infoSubtitle', 'reelUrl', 'heroPosterUrl', 'awardsAndPress', 'personalSiteUrl', 'personalSiteLabel', 'instagramUrl', 'videoChannelUrl', 'otherLinks', 'gear'].forEach((k) => {
+        if ((!merged[k] || !String(merged[k]).trim()) && base[k]) {
+          merged[k] = base[k];
+        }
+      });
+
+      return merged;
     } catch (_) {
       return base;
     }

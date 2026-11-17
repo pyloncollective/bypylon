@@ -98,7 +98,7 @@
             <span class="index-list__title"><i>${pad(i + 1)}</i><span>${esc(p.title)}</span></span>
             <span class="index-list__kind">${esc(p.kind)}${p.year ? ` (${esc(p.year)})` : ''}</span>
             <span class="index-list__roles">${esc(p.roles)}</span>
-            <span class="index-list__watch">Watch film &rarr;</span>
+            <span class="index-list__watch">${Array.isArray(p.gallery) && p.gallery.length ? 'View series &rarr;' : 'Watch film &rarr;'}</span>
           </a>
         </li>`
       )
@@ -279,9 +279,12 @@
       cueEl.classList.remove('is-instant');
     }
 
+    const isSeries = Array.isArray(proj.gallery) && proj.gallery.length > 0;
     cueKind.textContent = proj.kind || '';
     cueRoles.textContent = proj.roles || '';
+    cueWatch.textContent = isSeries ? 'View series' : 'Watch film';
     cueWatch.href = `#/${proj.slug}`;
+    if (pointerEl) pointerEl.textContent = isSeries ? 'View series' : 'Watch film';
   }
 
   function selectIndex(i, { force = false, isOpening = false } = {}) {
@@ -523,7 +526,39 @@
     filmPrev.href = `#/${projects[(idx - 1 + N) % N].slug}`;
     filmNext.href = `#/${projects[(idx + 1) % N].slug}`;
 
-    if (proj.youtube) {
+    if (Array.isArray(proj.gallery) && proj.gallery.length > 0) {
+      let gIdx = 0;
+      const imgs = proj.gallery;
+      filmFrame.innerHTML = `
+        <div class="film__gallery">
+          <div class="film__gallery-stage" id="galleryStage" title="Click for next frame">
+            <img id="galleryActiveImg" src="${esc(imgs[0])}" alt="${esc(proj.title)}">
+          </div>
+          <div class="film__gallery-bar">
+            <button type="button" id="galPrevBtn">&larr; Prev</button>
+            <span id="galCounter">01 / ${pad(imgs.length)}</span>
+            <div class="film__gallery-thumbs" id="galThumbs">
+              ${imgs.map((src, k) => `<img class="film__gallery-thumb ${k === 0 ? 'is-active' : ''}" data-gidx="${k}" src="${esc(src)}" alt="">`).join('')}
+            </div>
+            <button type="button" id="galNextBtn">Next &rarr;</button>
+          </div>
+        </div>`;
+
+      const activeImg = $('#galleryActiveImg', filmFrame);
+      const counter = $('#galCounter', filmFrame);
+      const thumbs = $$('.film__gallery-thumb', filmFrame);
+      const setFrame = (next) => {
+        gIdx = (next + imgs.length) % imgs.length;
+        activeImg.src = imgs[gIdx];
+        counter.textContent = `${pad(gIdx + 1)} / ${pad(imgs.length)}`;
+        thumbs.forEach((t, k) => t.classList.toggle('is-active', k === gIdx));
+      };
+
+      $('#galleryStage', filmFrame).addEventListener('click', () => setFrame(gIdx + 1));
+      $('#galPrevBtn', filmFrame).addEventListener('click', () => setFrame(gIdx - 1));
+      $('#galNextBtn', filmFrame).addEventListener('click', () => setFrame(gIdx + 1));
+      thumbs.forEach((t) => t.addEventListener('click', () => setFrame(Number(t.dataset.gidx))));
+    } else if (proj.youtube) {
       const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(proj.youtube)}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
       filmFrame.innerHTML = `<iframe src="${src}" title="${esc(proj.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>`;
     } else if (proj.vimeo) {
@@ -531,6 +566,17 @@
       filmFrame.innerHTML = `<iframe src="${src}" title="${esc(proj.title)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
     } else if (proj.videoUrl) {
       filmFrame.innerHTML = `<video src="${esc(proj.videoUrl)}" ${proj.still ? `poster="${esc(proj.still)}"` : ''} controls autoplay playsinline></video>`;
+    } else if (proj.instagramUrl) {
+      const cleanIg = proj.instagramUrl.split('?')[0].replace(/\/?$/, '/');
+      filmFrame.innerHTML = `
+        <div class="film__placeholder" style="border-style:solid; border-color:rgba(244,243,239,0.18);">
+          ${proj.still ? `<img src="${esc(proj.still)}" alt="" style="opacity:0.42;">` : ''}
+          <div class="film__placeholder-copy">
+            <strong>${esc(proj.title)}</strong>
+            <span>${esc(proj.kind || 'Campaign Film')}</span>
+            <a href="${esc(cleanIg)}" target="_blank" rel="noopener" style="margin-top:8px; display:inline-block; padding:10px 18px; background:var(--orange); color:var(--paper); font-weight:800; letter-spacing:0.08em;">Watch Campaign on Instagram &nearr;</a>
+          </div>
+        </div>`;
     } else {
       filmFrame.innerHTML = `
         <div class="film__placeholder">

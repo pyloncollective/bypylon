@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mason Cline — PYLON PICTURES</title>
-  <meta name="description" content="Mason Cline — Director · Photographer · Writer at Pylon Pictures, Toronto.">
+  <meta name="description" content="Mason Cline — Director, Cinematographer, Editor & 35mm Photographer at Pylon Pictures, Toronto.">
   <meta name="theme-color" content="#000000">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,14 +73,14 @@
     </div>
   </section>
 
-  <!-- INFORMATION VIEW: Biography, disciplines, lanes & index -->
+  <!-- INFORMATION VIEW: Biography, disciplines, photo series & full index -->
   <section class="info" id="infoView" aria-label="Information" tabindex="-1">
     <div class="info__inner">
 
       <div class="band band--bio">
         <h2 class="band__label">Biography</h2>
         <div class="bio">
-          <p class="bio__sub" id="bioSub">Director, Photographer &amp; Writer · Pylon Pictures</p>
+          <p class="bio__sub" id="bioSub">Founder, Director &amp; Photographer · Pylon Pictures</p>
           <div id="bioBody"></div>
         </div>
       </div>
@@ -108,7 +108,7 @@
         <p class="contact-meta__label">Direct Inquiry</p>
         <h2 class="contact-meta__heading" id="contactArtistHeading">Work with Mason</h2>
         <p class="contact-meta__detail">
-          Commercial production, music videos, narrative projects, or direct craft inquiries for Mason Cline. Sends directly from this page.
+          Commercial direction, music videos, 35mm &amp; medium-format photography campaigns, narrative treatments, or full Pylon Pictures production bids. Sends directly from this page.
         </p>
         <button type="button" class="copy-email-btn" id="copyEmailBtn" title="Copy email address">
           <span id="copyEmailLabel">mason@pylonpictures.com</span>
@@ -133,12 +133,12 @@
 
           <div class="field">
             <label for="cfProject">Project / Production</label>
-            <input type="text" id="cfProject" name="project" placeholder="Brand Campaign, Music Video, Narrative...">
+            <input type="text" id="cfProject" name="project" placeholder="Brand Campaign, Music Video, Editorial Shoot...">
           </div>
 
           <div class="field">
             <label for="cfTimeline">Target Timeline / Dates</label>
-            <input type="text" id="cfTimeline" name="timeline" placeholder="e.g. Q1 2027">
+            <input type="text" id="cfTimeline" name="timeline" placeholder="e.g. Shoot Dec · Delivery Jan 2027">
           </div>
 
           <div class="field field--full">
@@ -148,7 +148,7 @@
 
           <div class="field field--full">
             <label for="cfMessage">Project Brief &amp; Notes *</label>
-            <textarea id="cfMessage" name="message" required placeholder="Share links, deliverables, treatment notes, or schedule details..."></textarea>
+            <textarea id="cfMessage" name="message" required placeholder="Share treatment references, track or brand brief, deliverables, or shoot dates..."></textarea>
           </div>
 
           <div class="contact-actions">
@@ -164,188 +164,248 @@
   <!-- Artist Data Configuration -->
   <script>
     window.PYLON_PORTFOLIO = {
-      "slug": "mason-cline",
-      "name": "Mason Cline",
-      "roleLine": "Director · Photographer · Writer",
-      "location": "Toronto",
-      "email": "mason@pylonpictures.com",
-      "formEndpoint": "https://formspree.io/f/xrpzyngg",
-      "contactScopes": [
-            "Commercial Direction",
-            "Music Video",
-            "Narrative / Writing",
-            "Photography",
-            "Creative Treatment"
+      slug: "mason-cline",
+      name: "Mason Cline",
+      roleLine: "Director · Photographer · Writer",
+      location: "Toronto",
+      email: "mason@pylonpictures.com",
+      formEndpoint: "https://formspree.io/f/xrpzyngg",
+
+      contactScopes: [
+        "Commercial Direction",
+        "Music Video Direction",
+        "35mm / 120mm Photography",
+        "Cinematography (DP / Super 8)",
+        "Editorial",
+        "Creative Treatment & Writing"
       ],
-      "landing": {
-            "previewMp4": "../assets/videos/home-reel-colour.mp4",
-            "still": "../assets/images/home-reel-colour-poster.jpg",
-            "focus": 0.35,
-            "shade": [
-                  0.54,
-                  0.66
-            ]
+
+      landing: {
+        previewMp4: "../assets/videos/mason-reel-loop.mp4",
+        still: "../assets/images/mason/opening-poster.jpg",
+        focus: 0.38,
+        shade: [0.54, 0.66]
       },
-      "info": {
-            "subtitle": "Director, Photographer & Writer · Pylon Pictures",
-            "paragraphs": [
-                  "Mason Cline is a Toronto-based filmmaker and core ensemble member at Pylon Pictures, specializing in directing, 35mm &amp; digital photography, screenwriting &amp; treatments.",
-                  "Artist biography, full selected filmography, and custom showreel loop — placeholder copy for V1 review while final credits are synced through Pylon Backstage."
-            ],
-            "facts": [
-                  {
-                        "heading": "Primary Craft",
-                        "items": [
-                              {
-                                    "label": "Directing"
-                              },
-                              {
-                                    "label": "35mm & Digital Photography"
-                              },
-                              {
-                                    "label": "Screenwriting & Treatments"
-                              }
-                        ]
-                  },
-                  {
-                        "heading": "Additional Lanes",
-                        "items": [
-                              {
-                                    "label": "Location Scouting"
-                              },
-                              {
-                                    "label": "Editorial"
-                              },
-                              {
-                                    "label": "Camera Dept (AC)"
-                              },
-                              {
-                                    "label": "Producing"
-                              }
-                        ]
-                  },
-                  {
-                        "heading": "Studio Lanes",
-                        "items": [
-                              {
-                                    "label": "Client & Outreach"
-                              },
-                              {
-                                    "label": "Brand Strategy"
-                              },
-                              {
-                                    "label": "Reel & Credits — Updating V1"
-                              }
-                        ]
-                  },
-                  {
-                        "heading": "Direct",
-                        "items": [
-                              {
-                                    "label": "Send Direct Inquiry →",
-                                    "href": "#/contact"
-                              },
-                              {
-                                    "label": "Pylon Roster ↗",
-                                    "href": "../index.html?skip#roster"
-                              }
-                        ]
-                  }
+
+      info: {
+        subtitle: "Founder, Director, Cinematographer & Photographer · Pylon Pictures",
+        paragraphs: [
+          "Mason Cline is a Toronto-based director, cinematographer, editor, and photographer specializing in music videos, commercial campaigns, short films, and analog visual arts. As founder of Pylon Pictures, he leads creative direction and treatments from initial concept through on-set execution and editorial cut.",
+          "Working across digital cinema, Super 8, 35mm, and 120mm medium-format film, his work pairs kinetic pacing with tactile, lived-in worldbuilding for artists and brands including insyt., Donat Jackson, ZOE, Kai Banks, Prettybxkay, REACH Collective, GBL, and Côté Ibis x New Era.",
+          "His cinematography and analog still photography include the festival-selected short film Thiếu, Nữ (2025), alongside 35mm campaign and documentary portrait series for <a href=\"https://masoncline.ca\" target=\"_blank\" rel=\"noopener\">PATHFINDER, REACH, and SP!KE</a>."
+        ],
+        facts: [
+          {
+            heading: "Primary Craft",
+            items: [
+              { label: "Commercial & Music Video Direction" },
+              { label: "35mm & 120mm Film Photography" },
+              { label: "Offline Editorial & Pacing" },
+              { label: "Screenwriting & Pitch Treatments" },
+              { label: "Super 8 & Analog Cinema" }
             ]
+          },
+          {
+            heading: "Additional Lanes",
+            items: [
+              { label: "Cinematography (DP)" },
+              { label: "Location Scouting" },
+              { label: "Creative Producing" },
+              { label: "Client & Brand Strategy" }
+            ]
+          },
+          {
+            heading: "Selected Photo & Press",
+            items: [
+              { label: "Thiếu, Nữ — Official Festival Selection" },
+              { label: "REACH Collective — 35mm Fashion Campaign" },
+              { label: "PATHFINDER (2026) — 35mm Press Portraits" },
+              { label: "GBL & Côté Ibis x New Era Campaigns" }
+            ]
+          },
+          {
+            heading: "Elsewhere",
+            items: [
+              { label: "Send Direct Inquiry →", href: "#/contact" },
+              { label: "35mm Photo Archive (masoncline.ca) ↗", href: "https://masoncline.ca", external: true },
+              { label: "Instagram (@mason.clinee) ↗", href: "https://www.instagram.com/mason.clinee/", external: true },
+              { label: "Film & BTS (@planetbogus) ↗", href: "https://www.instagram.com/planetbogus/", external: true }
+            ]
+          }
+        ]
       },
-      "projects": [
-            {
-                  "slug": "project-01",
-                  "title": "Selected Commercial — Placeholder",
-                  "kind": "Commercial Campaign · Placeholder",
-                  "roles": "Director & Writer",
-                  "year": "2026",
-                  "still": "../assets/images/still-01.jpg",
-                  "placeholder": true,
-                  "placeholderNote": "Selected Reel & Full Project Cut — Coming Soon",
-                  "focus": 0.45,
-                  "shade": [
-                        0.54,
-                        0.64
-                  ]
-            },
-            {
-                  "slug": "project-02",
-                  "title": "Selected Music Video — Placeholder",
-                  "kind": "Music Video · Placeholder",
-                  "roles": "Director & Editor",
-                  "year": "2026",
-                  "still": "../assets/images/still-02.jpg",
-                  "placeholder": true,
-                  "placeholderNote": "Selected Reel & Full Project Cut — Coming Soon",
-                  "focus": 0.45,
-                  "shade": [
-                        0.54,
-                        0.64
-                  ]
-            },
-            {
-                  "slug": "project-03",
-                  "title": "Selected Narrative — Placeholder",
-                  "kind": "Narrative Short · Placeholder",
-                  "roles": "Writer & Director",
-                  "year": "2026",
-                  "still": "../assets/images/still-03.jpg",
-                  "placeholder": true,
-                  "placeholderNote": "Selected Reel & Full Project Cut — Coming Soon",
-                  "focus": 0.45,
-                  "shade": [
-                        0.54,
-                        0.64
-                  ]
-            },
-            {
-                  "slug": "project-04",
-                  "title": "Editorial Photo Series — Placeholder",
-                  "kind": "35mm Photography · Placeholder",
-                  "roles": "Photographer",
-                  "year": "2026",
-                  "still": "../assets/images/still-04.jpg",
-                  "placeholder": true,
-                  "placeholderNote": "Selected Reel & Full Project Cut — Coming Soon",
-                  "focus": 0.45,
-                  "shade": [
-                        0.54,
-                        0.64
-                  ]
-            },
-            {
-                  "slug": "project-05",
-                  "title": "Branded Film — Placeholder",
-                  "kind": "Spec / Campaign · Placeholder",
-                  "roles": "Director",
-                  "year": "2026",
-                  "still": "../assets/images/still-05.jpg",
-                  "placeholder": true,
-                  "placeholderNote": "Selected Reel & Full Project Cut — Coming Soon",
-                  "focus": 0.45,
-                  "shade": [
-                        0.54,
-                        0.64
-                  ]
-            },
-            {
-                  "slug": "project-06",
-                  "title": "Visual Treatment Study — Placeholder",
-                  "kind": "Director Reel · Placeholder",
-                  "roles": "Director & Writer",
-                  "year": "2026",
-                  "still": "../assets/images/still-06.jpg",
-                  "placeholder": true,
-                  "placeholderNote": "Selected Reel & Full Project Cut — Coming Soon",
-                  "focus": 0.45,
-                  "shade": [
-                        0.54,
-                        0.64
-                  ]
-            }
+
+      projects: [
+        {
+          slug: "insyt-360",
+          title: "insyt. — 360°",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director & Editor",
+          year: "2026",
+          still: "../assets/images/mason/insyt-360.jpg",
+          youtube: "CKdqD851gQ0",
+          focus: 0.35,
+          shade: [0.49, 0.64]
+        },
+        {
+          slug: "sweartogod",
+          title: "Donat Jackson — sweartogod!",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director",
+          year: "2026",
+          still: "../assets/images/jackson/sweartogod.jpg",
+          youtube: "a3y5_lFqbsE",
+          focus: 0.35,
+          shade: [0.68, 0.56]
+        },
+        {
+          slug: "insyt-heal",
+          title: "insyt. — Heal (feat. Jay Versace & Mileena)",
+          kind: "Music Video · Co-Dir. Declan McKenna",
+          roles: "Director & Super 8",
+          year: "2026",
+          still: "../assets/images/mason/insyt-heal.jpg",
+          youtube: "2i1VwJyLIs0",
+          focus: 0.42,
+          shade: [0.76, 0.67]
+        },
+        {
+          slug: "needmoretime",
+          title: "Donat Jackson — needmoretime!",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director & Editor",
+          year: "2026",
+          still: "../assets/images/mason/needmoretime.jpg",
+          youtube: "m3GzM8sJ_V8",
+          focus: 0.48,
+          shade: [0.54, 0.63]
+        },
+        {
+          slug: "insyt-toll",
+          title: "insyt. — Toll",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director, Editor & Super 8",
+          year: "2026",
+          still: "../assets/images/mason/insyt-toll.jpg",
+          youtube: "chQBG5lTCnM",
+          focus: 0.45,
+          shade: [0.78, 0.60]
+        },
+        {
+          slug: "zoe-attitude-motion",
+          title: "ZOE — Attitude & Motion",
+          kind: "Music Video · Co-Dir. Maya Chariandy",
+          roles: "Director, DP, Edit & Colour",
+          year: "2025",
+          still: "../assets/images/mason/zoe-attitude-motion.jpg",
+          youtube: "EfRm28PLvKA",
+          focus: 0.38,
+          shade: [0.60, 0.67]
+        },
+        {
+          slug: "kai-banks-maze",
+          title: "Kai Banks — Maze",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director & Editor",
+          year: "2025",
+          still: "../assets/images/mason/kai-banks-maze.jpg",
+          youtube: "PFcnSxjB-KM",
+          focus: 0.45,
+          shade: [0.76, 0.72]
+        },
+        {
+          slug: "thieu-nu",
+          title: "Thiếu, Nữ",
+          kind: "Short Film · Dir. Thuỵ Huỳnh Thái",
+          roles: "Director of Photography, Colour & 35mm Photo",
+          year: "2025",
+          still: "../assets/images/mason/thieu-nu.jpg",
+          youtube: "66nTpR10RQQ",
+          focus: 0.42,
+          shade: [0.72, 0.72]
+        },
+        {
+          slug: "insyt-puppet-strings",
+          title: "insyt. — Puppet Strings",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director & Editor",
+          year: "2025",
+          still: "../assets/images/mason/insyt-puppet-strings.jpg",
+          youtube: "6GvYSWZT93s",
+          focus: 0.48,
+          shade: [0.52, 0.74]
+        },
+        {
+          slug: "prettybxkay-4nicate",
+          title: "Prettybxkay — 4nicate",
+          kind: "Music Video · Pylon Pictures",
+          roles: "Director, Editor & Super 8",
+          year: "2025",
+          still: "../assets/images/mason/prettybxkay-4nicate.jpg",
+          youtube: "ZTq6Xg301Eg",
+          focus: 0.36,
+          shade: [0.57, 0.63]
+        },
+        {
+          slug: "gbl-gangsta-is-gorgeous",
+          title: "GBL — Gangsta is Gorgeous",
+          kind: "Commercial Campaign · Khaki Set",
+          roles: "Director, DP, Editor & Colour",
+          year: "2025",
+          still: "../assets/images/mason/gbl-campaign.jpg",
+          instagramUrl: "https://www.instagram.com/p/DP7EbUoEogg/",
+          focus: 0.5,
+          shade: [0.44, 0.56]
+        },
+        {
+          slug: "cote-ibis-draft-day",
+          title: "Côté Ibis — Draft Day (New Era)",
+          kind: "Commercial Campaign · Pylon Pictures",
+          roles: "Director & Editor",
+          year: "2025",
+          still: "../assets/images/mason/cote-ibis-draft-day.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/draft-night.mp4",
+          focus: 0.4,
+          shade: [0.45, 0.58]
+        },
+        {
+          slug: "reach-collective-35mm",
+          title: "REACH Collective — 35mm Campaign",
+          kind: "Editorial Fashion Campaign · 35mm Film",
+          roles: "Photographer & Creative Direction",
+          year: "2025",
+          still: "../assets/images/mason/reach-04.jpg",
+          gallery: [
+            "../assets/images/mason/reach-04.jpg",
+            "../assets/images/mason/reach-01.jpg",
+            "../assets/images/mason/reach-02.jpg",
+            "../assets/images/mason/reach-03.jpg",
+            "../assets/images/mason/reach-05.jpg",
+            "../assets/images/mason/reach-06.jpg"
+          ],
+          focus: 0.28,
+          shade: [0.58, 0.68]
+        },
+        {
+          slug: "pathfinder-35mm",
+          title: "PATHFINDER — 35mm Portraits",
+          kind: "Documentary Press Series · 35mm Film",
+          roles: "35mm Photographer",
+          year: "2026",
+          still: "../assets/images/mason/pathfinder-04.jpg",
+          gallery: [
+            "../assets/images/mason/pathfinder-04.jpg",
+            "../assets/images/mason/pathfinder-01.jpg",
+            "../assets/images/mason/pathfinder-02.jpg",
+            "../assets/images/mason/pathfinder-03.jpg",
+            "../assets/images/mason/pathfinder-05.jpg",
+            "../assets/images/mason/pathfinder-06.jpg"
+          ],
+          focus: 0.42,
+          shade: [0.52, 0.64]
+        }
       ]
-};
+    };
   </script>
   <script src="../js/portfolio.js"></script>
 </body>

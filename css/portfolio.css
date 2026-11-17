@@ -568,12 +568,96 @@ body.is-opening .mast-name__clip {
 
 .film__frame iframe,
 .film__frame video,
-.film__placeholder {
+.film__placeholder,
+.film__gallery {
   width: min(100cqw, 177.78cqh);
   height: min(100cqh, 56.25cqw);
   border: 0;
   background: var(--black);
   outline: none;
+}
+
+.film__gallery {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.film__gallery-stage {
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.film__gallery-stage img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.22s ease;
+}
+
+.film__gallery-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--cap);
+  color: var(--dim);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.film__gallery-bar button {
+  color: var(--paper);
+  padding: 4px 6px;
+  flex-shrink: 0;
+  transition: color 0.18s ease;
+}
+
+.film__gallery-bar button:hover {
+  color: var(--orange);
+}
+
+.film__gallery-thumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  max-width: min(46vw, 480px);
+  scrollbar-width: none;
+}
+
+.film__gallery-thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.film__gallery-thumb {
+  width: 38px;
+  height: 26px;
+  object-fit: cover;
+  opacity: 0.38;
+  border: 1px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.18s ease, border-color 0.18s ease;
+}
+
+.film__gallery-thumb:hover,
+.film__gallery-thumb.is-active {
+  opacity: 1;
+  border-color: var(--orange);
 }
 
 .film__placeholder {
@@ -1174,6 +1258,10 @@ body.is-opening .mast-name__clip {
 
   .film {
     padding: calc(var(--mast-h) + 16px) var(--edge) max(22px, env(safe-area-inset-bottom, 22px));
+  }
+
+  .film__gallery-thumbs {
+    max-width: 34vw;
   }
 
   .film-strip {
