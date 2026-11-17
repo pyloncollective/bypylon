@@ -255,7 +255,157 @@
         <span>Contact</span>
         <span>04</span>
       </div>
-      <a class="contact-mail" href="mailto:contact@pylonpictures.com">contact@pylonpictures.com</a>
+
+      <div class="inquiry">
+        <div class="inquiry-intro">
+          <h2 class="inquiry-title">Start a project</h2>
+          <p class="inquiry-lede">Tell us what you're making. Four quick steps and it lands straight with the Pylon team.</p>
+          <ol class="inquiry-progress" id="inqProgress" aria-label="Inquiry steps">
+            <li class="is-current"><span>01</span>Interest</li>
+            <li><span>02</span>Project</li>
+            <li><span>03</span>Brief</li>
+            <li><span>04</span>You</li>
+          </ol>
+        </div>
+
+        <form class="inquiry-form" id="inquiryForm" novalidate>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" hidden>
+
+          <!-- STEP 01 — Interest -->
+          <fieldset class="inq-step is-active" data-step="1">
+            <legend class="inq-q" tabindex="-1">What can we make for you?</legend>
+            <p class="inq-hint">Pick everything that applies.</p>
+            <div class="inq-options inq-options--grid" data-group="interests" data-required="true">
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Commercial / Branded Film"><span>Commercial &amp; Branded Film</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Music Video"><span>Music Video</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Narrative / Short Film"><span>Narrative &amp; Short Film</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Documentary"><span>Documentary</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Photography / Stills"><span>Photography &amp; Stills</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Post-Production / Edit / Colour / Sound"><span>Post: Edit, Colour &amp; Sound</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Design / 3D / Titles"><span>Design, 3D &amp; Titles</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Crew Hire"><span>Crew Hire (DP, Gaffer, AD&hellip;)</span></label>
+              <label class="inq-opt"><input type="checkbox" name="interests" value="Something else"><span>Something Else</span></label>
+            </div>
+          </fieldset>
+
+          <!-- STEP 02 — Project -->
+          <fieldset class="inq-step" data-step="2" hidden>
+            <legend class="inq-q" tabindex="-1">Tell us about the project.</legend>
+
+            <div class="inq-field">
+              <label for="inqProject">Project or brand name</label>
+              <input type="text" id="inqProject" name="project" placeholder="e.g. Spring campaign, new single, short film">
+            </div>
+
+            <div class="inq-field">
+              <span class="inq-label" id="inqBudgetLabel">Budget range (CAD)</span>
+              <div class="inq-options" data-group="budget" role="radiogroup" aria-labelledby="inqBudgetLabel">
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="budget" value="Under $5k"><span>Under $5k</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="budget" value="$5k–$15k"><span>$5k&ndash;$15k</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="budget" value="$15k–$50k"><span>$15k&ndash;$50k</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="budget" value="$50k+"><span>$50k+</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="budget" value="Not sure yet"><span>Not sure yet</span></label>
+              </div>
+            </div>
+
+            <div class="inq-field">
+              <span class="inq-label" id="inqTimelineLabel">Timeline</span>
+              <div class="inq-options" data-group="timeline" role="radiogroup" aria-labelledby="inqTimelineLabel">
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="timeline" value="ASAP / within a month"><span>Within a month</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="timeline" value="1–3 months"><span>1&ndash;3 months</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="timeline" value="3+ months"><span>3+ months</span></label>
+                <label class="inq-opt inq-opt--pill"><input type="radio" name="timeline" value="Flexible"><span>Flexible</span></label>
+              </div>
+            </div>
+
+            <div class="inq-field">
+              <label for="inqDates">Key dates <em>(optional)</em></label>
+              <input type="text" id="inqDates" name="key_dates" placeholder="Shoot window, release date, deadline">
+            </div>
+          </fieldset>
+
+          <!-- STEP 03 — Brief -->
+          <fieldset class="inq-step" data-step="3" hidden>
+            <legend class="inq-q" tabindex="-1">What's the idea?</legend>
+
+            <div class="inq-field">
+              <label for="inqMessage">Brief &amp; notes *</label>
+              <textarea id="inqMessage" name="message" rows="5" required placeholder="What you're making, who it's for, deliverables, the feeling you're after&hellip;"></textarea>
+            </div>
+
+            <div class="inq-field">
+              <label for="inqLinks">Links <em>(optional)</em></label>
+              <input type="text" id="inqLinks" name="links" placeholder="Treatment, moodboard, references, track">
+            </div>
+
+            <div class="inq-field">
+              <label for="inqArtist">Anyone specific you'd like to work with?</label>
+              <select id="inqArtist" name="preferred_artist">
+                <option value="Pylon to recommend">No preference: Pylon recommends</option>
+                <option>Mason Cline</option>
+                <option>Jackson McMurdo</option>
+                <option>Dario Butera</option>
+                <option>Jessica Binns</option>
+                <option>Declan McKenna</option>
+                <option>Maya Chariandy</option>
+                <option>Jordan Wong</option>
+                <option>Dickson Ntiamoah</option>
+                <option>Daniel Fusco</option>
+                <option>Misan Edema</option>
+                <option>Justin Tan</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <!-- STEP 04 — You -->
+          <fieldset class="inq-step" data-step="4" hidden>
+            <legend class="inq-q" tabindex="-1">Where do we reach you?</legend>
+
+            <div class="inq-row">
+              <div class="inq-field">
+                <label for="inqName">Name *</label>
+                <input type="text" id="inqName" name="name" autocomplete="name" required>
+              </div>
+              <div class="inq-field">
+                <label for="inqEmail">Email *</label>
+                <input type="email" id="inqEmail" name="email" autocomplete="email" required>
+              </div>
+            </div>
+
+            <div class="inq-row">
+              <div class="inq-field">
+                <label for="inqCompany">Company / Agency <em>(optional)</em></label>
+                <input type="text" id="inqCompany" name="company" autocomplete="organization">
+              </div>
+              <div class="inq-field">
+                <label for="inqPhone">Phone <em>(optional)</em></label>
+                <input type="tel" id="inqPhone" name="phone" autocomplete="tel">
+              </div>
+            </div>
+
+            <div class="inq-field">
+              <label for="inqReferral">How did you find us? <em>(optional)</em></label>
+              <input type="text" id="inqReferral" name="referral" placeholder="Instagram, referral, saw a project&hellip;">
+            </div>
+          </fieldset>
+
+          <!-- DONE -->
+          <div class="inq-done" id="inqDone" hidden tabindex="-1">
+            <p class="inq-q">Thanks. It's with us.</p>
+            <p class="inq-hint">Someone from the Pylon team will reply within two business days.</p>
+            <button type="button" class="inq-btn inq-btn--ghost" id="inqRestart">Send another</button>
+          </div>
+
+          <div class="inq-nav" id="inqNav">
+            <button type="button" class="inq-btn inq-btn--ghost" id="inqBack" hidden>&larr; Back</button>
+            <span class="inq-count" id="inqCount">Step 1 of 4</span>
+            <button type="button" class="inq-btn" id="inqNext">Next &rarr;</button>
+            <button type="submit" class="inq-btn" id="inqSubmit" hidden>Send inquiry</button>
+          </div>
+          <p class="inq-status" id="inqStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
       <div class="contact-meta">
         <span>Toronto, ON</span>
         <span>&copy; 2026 Pylon Pictures &nbsp;&middot;&nbsp; <a href="portal/" style="color:inherit; text-decoration:none; opacity:0.65;">Crew Portal</a></span>
@@ -265,5 +415,6 @@
 
   <script src="js/main.js"></script>
   <script src="js/roster.js"></script>
+  <script src="js/inquiry.js"></script>
 </body>
 </html>

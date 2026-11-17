@@ -111,7 +111,7 @@
 
   if (replayBtn) replayBtn.addEventListener('click', play);
   document.addEventListener('keydown', (e) => {
-    if (e.target.closest('input, textarea')) return;
+    if (e.target.closest('input, textarea, select, button, label')) return;
     if (e.key === 'r' || e.key === 'R') play();
     if (e.key === 'Escape') skip();
   });
