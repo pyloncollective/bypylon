@@ -1,59 +1,409 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="js">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Jackson McMurdo — PYLON PICTURES</title>
+  <meta name="description" content="Jackson McMurdo — Post-Production Supervisor, Lead Colourist, Editor, DIT & Sound Designer at Pylon Pictures, Toronto.">
+  <meta name="theme-color" content="#000000">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/portfolio.css">
 </head>
-<body class="page-roster page-person">
+<body class="page-portfolio is-opening" data-view="home">
 
-  <header class="nav">
-    <div class="nav-left">
-      <a href="../index.html?skip#work">Work</a>
-      <a href="../index.html?skip#who">Who We Are</a>
-      <a href="../index.html?skip#roster" class="is-active">Roster</a>
-    </div>
-    <div class="nav-right">
-      <a href="../index.html?skip#contact" class="nav-cta">Contact</a>
-    </div>
+  <!-- Full-bleed cinema screen: opening showreel loop & hovered project plates -->
+  <div class="screen" id="screen" aria-hidden="true">
+    <div class="plates" id="plates"></div>
+    <div class="veil" id="veil"></div>
+    <div class="shade" id="shade"></div>
+  </div>
+
+  <!-- Custom cursor over live cinema screen -->
+  <p class="pointer" id="pointer" aria-hidden="true">Watch film</p>
+
+  <!-- 12-Column Pylon Artist Masthead -->
+  <header class="mast">
+    <h1 class="mast-name">
+      <a href="#/">
+        <span class="mast-name__clip">
+          <span class="mast-name__word" id="artistNameWord">Jackson McMurdo</span>
+        </span>
+      </a>
+    </h1>
+
+    <p class="mast-role">
+      <span id="artistRoleTitle">Post &amp; Colour · DIT · Sound</span>
+      <span class="mast-role__loc" id="artistRoleLoc">Toronto</span>
+    </p>
+
+    <nav class="mast-nav" aria-label="Portfolio navigation">
+      <a href="../index.html?skip#roster" class="mast-nav__back">&larr; Roster</a>
+      <a href="#/" data-nav="work" class="is-on">Work</a>
+      <a href="#/information" data-nav="information">Information</a>
+      <a href="#/contact" data-nav="contact">Contact</a>
+    </nav>
   </header>
 
-  <main class="person">
-    <a class="person-back" href="../index.html?skip#roster">&larr; Roster</a>
-    <div class="person-hero">
-      <div class="person-hero-text">
-        <h1 class="person-name">Jackson McMurdo</h1>
-    <p class="person-roles">Post-Production Supervisor / Lead Colourist / DIT / Sound</p>
-      </div>
-      <div class="person-portrait-slot" aria-label="Portrait placeholder">Headshot<br>Jan 2027</div>
+  <!-- HOME VIEW: Bottom-left numbered programme list + sliding horizontal cue bar -->
+  <main class="programme" id="programme">
+    <ol class="programme-list" id="programmeList" aria-label="Selected credits"></ol>
+
+    <div class="cue is-off" id="cue">
+      <span class="cue__line"><i id="cueBar"></i></span>
+      <p class="cue__kind" id="cueKind"></p>
+      <p class="cue__roles" id="cueRoles"></p>
+      <a class="cue__watch" id="cueWatch" href="#/">Watch film</a>
     </div>
-
-    <section class="person-meta" aria-label="Member disciplines and contact">
-      <div class="person-meta-block">
-        <h2>Primary Craft</h2>
-        <p>Colour &amp; Finishing, Editorial, DIT, Production Sound, Motion/Graphics</p>
-      </div>
-      <div class="person-meta-block">
-        <h2>Additional Disciplines</h2>
-        <p>Cinematography (DP), Camera Dept (1st/2nd AC)</p>
-      </div>
-      <div class="person-meta-block">
-        <h2>Studio Lanes</h2>
-        <p>Post Supervisor · Tech &amp; Web · Finance</p>
-      </div>
-      <div class="person-meta-block">
-        <h2>Direct</h2>
-        <p><a href="mailto:jackson@pylonpictures.com">jackson@pylonpictures.com</a></p>
-        <a class="ext-link" href="https://mukpost.com" target="_blank" rel="noopener">mukpost.com &nearr;</a>
-      </div>
-    </section>
-
-    <div class="person-placeholder">Selected work &amp; reel — Jan 2027 V1</div>
   </main>
 
+  <!-- FILM VIEW: Click-into project player & bottom credit strip -->
+  <section class="film" id="filmView" aria-label="Film player">
+    <div class="film__frame" id="filmFrame"></div>
+    <div class="film-strip">
+      <p class="film-strip__title"><i id="filmNo"></i><span id="filmTitle"></span></p>
+      <p class="film-strip__kind" id="filmKind"></p>
+      <p class="film-strip__roles" id="filmRoles"></p>
+      <p class="film-strip__nav">
+        <a href="#/" id="filmPrev">Prev</a>
+        <a href="#/" id="filmNext">Next film</a>
+        <a href="#/" id="filmClose">Close</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- INFORMATION VIEW: Biography, disciplines, festivals/press & full index -->
+  <section class="info" id="infoView" aria-label="Information" tabindex="-1">
+    <div class="info__inner">
+
+      <div class="band band--bio">
+        <h2 class="band__label">Biography</h2>
+        <div class="bio">
+          <p class="bio__sub" id="bioSub">Head of Operations &amp; Post Supervisor · Pylon Pictures</p>
+          <div id="bioBody"></div>
+        </div>
+      </div>
+
+      <div class="band band--facts" id="factsGrid"></div>
+
+      <div class="band band--index">
+        <h2 class="band__label">Selected Credits Index</h2>
+        <ol class="index-list" id="indexList"></ol>
+      </div>
+
+      <div class="band band--foot">
+        <p>&copy; 2026 Pylon Pictures &middot; Toronto, ON</p>
+        <button type="button" id="toTopBtn">Back to top &uarr;</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT VIEW: In-site inquiry form (no mailto popup) -->
+  <section class="contact-view" id="contactView" aria-label="Contact" tabindex="-1">
+    <div class="contact-view__inner contact-grid">
+
+      <div class="contact-meta">
+        <p class="contact-meta__label">Direct Inquiry</p>
+        <h2 class="contact-meta__heading" id="contactArtistHeading">Work with Jackson</h2>
+        <p class="contact-meta__detail">
+          Commercial finishing, colour grading, editorial, sound design, DIT, or full Pylon production inquiries. Sends directly from this page.
+        </p>
+        <button type="button" class="copy-email-btn" id="copyEmailBtn" title="Copy email address">
+          <span id="copyEmailLabel">jackson@pylonpictures.com</span>
+          <span>&middot; Copy</span>
+        </button>
+      </div>
+
+      <div class="contact-form-wrap">
+        <form class="contact-form" id="portfolioContactForm" novalidate>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" hidden>
+          <input type="hidden" name="scopes" id="contactScopesInput" value="">
+
+          <div class="field">
+            <label for="cfName">Your Name *</label>
+            <input type="text" id="cfName" name="name" required placeholder="Jane Doe">
+          </div>
+
+          <div class="field">
+            <label for="cfEmail">Your Email *</label>
+            <input type="email" id="cfEmail" name="email" required placeholder="jane@agency.com">
+          </div>
+
+          <div class="field">
+            <label for="cfProject">Project / Production</label>
+            <input type="text" id="cfProject" name="project" placeholder="Brand Campaign, Music Video, Narrative...">
+          </div>
+
+          <div class="field">
+            <label for="cfTimeline">Target Timeline / Dates</label>
+            <input type="text" id="cfTimeline" name="timeline" placeholder="e.g. Shoot Dec 12 · Delivery Jan 2027">
+          </div>
+
+          <div class="field field--full">
+            <label>Disciplines Needed</label>
+            <div class="scope-pills" id="scopePills"></div>
+          </div>
+
+          <div class="field field--full">
+            <label for="cfMessage">Project Brief &amp; Notes *</label>
+            <textarea id="cfMessage" name="message" required placeholder="Share links, deliverables, camera package, or schedule details..."></textarea>
+          </div>
+
+          <div class="contact-actions">
+            <button type="submit" class="contact-submit" id="contactSubmitBtn">Send Inquiry</button>
+            <p class="contact-status" id="contactStatus" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Artist Data Configuration (Reusable Schema for all 11 Pylon Members) -->
+  <script>
+    window.PYLON_PORTFOLIO = {
+      slug: "jackson-mcmurdo",
+      name: "Jackson McMurdo",
+      roleLine: "Post & Colour · DIT · Sound",
+      location: "Toronto",
+      email: "jackson@pylonpictures.com",
+      formEndpoint: "https://formspree.io/f/xrpzyngg",
+
+      contactScopes: [
+        "Colour Grading",
+        "Offline / Online Edit",
+        "Sound Design & Mix",
+        "Title Design & VFX",
+        "On-Set DIT",
+        "Cinematography (DP)",
+        "Post Supervision"
+      ],
+
+      landing: {
+        previewMp4: "../assets/videos/home-reel-colour.mp4",
+        still: "../assets/images/home-reel-colour-poster.jpg",
+        focus: 0.35,
+        shade: [0.54, 0.66]
+      },
+
+      info: {
+        subtitle: "Head of Operations & Post Supervisor · Pylon Pictures",
+        paragraphs: [
+          "Jackson McMurdo is a Toronto-based post-production supervisor, lead colourist, editor, and re-recording mixer. At Pylon Pictures, he oversees technical workflows from on-set camera and DIT management through offline editorial, DaVinci Wide Gamut colour pipelines, sound design, and final master delivery.",
+          "Trained at Toronto Metropolitan University (BFA Film Studies, '26) and founder of independent Toronto finishing studio <a href=\"https://mukpost.com\" target=\"_blank\" rel=\"noopener\">Muk Post</a>, he bridges camera-department precision with obsessive finishing craft across commercials, music videos, documentaries, and 16mm narrative films.",
+          "His work as a director, cinematographer, and finisher has screened through MDFF at TIFF Bell Lightbox and been featured in Cinema Scope."
+        ],
+        facts: [
+          {
+            heading: "Primary Craft",
+            items: [
+              { label: "Colour Grading & Film Emulation" },
+              { label: "Editorial & Finishing" },
+              { label: "Sound Design, Foley & Mix" },
+              { label: "On-Set DIT & Workflow" },
+              { label: "Custom Title & Motion Design" }
+            ]
+          },
+          {
+            heading: "Additional Lanes",
+            items: [
+              { label: "Cinematography (DP)" },
+              { label: "Camera Dept (1st / 2nd AC)" },
+              { label: "16mm Film Pipeline" },
+              { label: "Festival & Broadcast QC" }
+            ]
+          },
+          {
+            heading: "Press & Selections",
+            items: [
+              { label: "TIFF Programming Lineup (MDFF)", href: "https://tiff.net/press/news/tiffs-july-2023-programming-lineup-announced", external: true },
+              { label: "MDFF Selects — Last Night", href: "https://mdff.ca/select/the-novelists-film/", external: true },
+              { label: "Cinema Scope Feature", href: "https://cinema-scope.com/cinema-scope-online/playtime-three-shorts-by-justin-tan-kyla-stone-and-jackson-mcmurdo/", external: true }
+            ]
+          },
+          {
+            heading: "Elsewhere",
+            items: [
+              { label: "Send Direct Inquiry →", href: "#/contact" },
+              { label: "Muk Post Finishing ↗", href: "https://mukpost.com", external: true },
+              { label: "Instagram (@muk.post) ↗", href: "https://instagram.com/muk.post", external: true },
+              { label: "YouTube ↗", href: "https://www.youtube.com/@MukPostProduction", external: true }
+            ]
+          }
+        ]
+      },
+
+      projects: [
+        {
+          slug: "sweartogod",
+          title: "Donat Jackson — sweartogod!",
+          kind: "Music Video · Dir. Mason Cline",
+          roles: "Edit, Colour Grading & Title Design",
+          year: "2026",
+          still: "../assets/images/jackson/sweartogod.jpg",
+          youtube: "a3y5_lFqbsE",
+          focus: 0.35,
+          shade: [0.68, 0.56]
+        },
+        {
+          slug: "needmoretime",
+          title: "Donat Jackson — needmoretime!",
+          kind: "Music Video · Dir. Mason Cline & Jackson McMurdo",
+          roles: "Colour Grading, DIT, VFX, Sound & Title Design",
+          year: "2026",
+          still: "../assets/images/jackson/needmoretime.jpg",
+          youtube: "m3GzM8sJ_V8",
+          focus: 0.42,
+          shade: [0.54, 0.62]
+        },
+        {
+          slug: "spike",
+          title: "SP!KE",
+          kind: "Narrative Short · Dir. Maya Chariandy",
+          roles: "Cinematography (DP), Edit, Sound Design, Mix & DIT",
+          year: "2026",
+          still: "../assets/images/jackson/spike.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/spike-1080p.mp4",
+          focus: 0.38,
+          shade: [0.68, 0.66]
+        },
+        {
+          slug: "insyt-360",
+          title: "insyt. — 360°",
+          kind: "Music Video · Dir. Mason Cline & Jackson McMurdo",
+          roles: "Colour Grading, Co-Editor, Motion Titles & Sound",
+          year: "2026",
+          still: "../assets/images/jackson/insyt-360.jpg",
+          youtube: "CKdqD851gQ0",
+          focus: 0.45,
+          shade: [0.44, 0.55]
+        },
+        {
+          slug: "beer-league",
+          title: "Lady Marge — Beer League",
+          kind: "Live Performance Film",
+          roles: "Colour Grading, Live Audio, Asst. Edit & Titling",
+          year: "2026",
+          still: "../assets/images/jackson/beer-league.jpg",
+          youtube: "zOgTcW_rOoQ",
+          focus: 0.45,
+          shade: [0.48, 0.56]
+        },
+        {
+          slug: "between-friends-jam",
+          title: "Between Friends — JAM!",
+          kind: "Live Music Video",
+          roles: "Editing, Colour Grading, Motion Graphics & VFX",
+          year: "2025",
+          still: "../assets/images/jackson/between-friends-jam.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/between-friends-jam-1080p.mp4",
+          focus: 0.45,
+          shade: [0.54, 0.58]
+        },
+        {
+          slug: "hoop-dreams",
+          title: "I Am Because We Are — Hoop Dreams",
+          kind: "Documentary Short",
+          roles: "Documentary Editing, Colour Grading & Sound Mix",
+          year: "2025",
+          still: "../assets/images/jackson/hoop-dreams.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/hoop-dreams-doc-1080p.mp4",
+          focus: 0.42,
+          shade: [0.55, 0.62]
+        },
+        {
+          slug: "cerberus",
+          title: "Cerberus",
+          kind: "Narrative Short · Dir. Johnny Tsatsos",
+          roles: "Sound Design & Re-Recording Mix",
+          year: "2026",
+          still: "../assets/images/jackson/cerberus.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/cerberus-1080p.mp4",
+          focus: 0.45,
+          shade: [0.60, 0.60]
+        },
+        {
+          slug: "last-night",
+          title: "Last Night",
+          kind: "16mm Short · MDFF at TIFF",
+          roles: "Edit, 16mm Colour Grading, Sound Design & Mix",
+          year: "2023",
+          still: "../assets/images/jackson/last-night.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/last-night-1080p.mp4",
+          focus: 0.38,
+          shade: [0.45, 0.56]
+        },
+        {
+          slug: "holy-vexation",
+          title: "Holy Vexation",
+          kind: "16mm Short · Dir. Declan McKenna",
+          roles: "Sound Editor",
+          year: "2025",
+          still: "../assets/images/jackson/holy-vexation.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/holy-vexation-1080p.mp4",
+          focus: 0.45,
+          shade: [0.62, 0.72]
+        },
+        {
+          slug: "draft-night",
+          title: "Côté Ibis — Draft Night",
+          kind: "Narrative / Commercial · Dir. Mason Cline",
+          roles: "Sound Design, Mix & ADR",
+          year: "2025",
+          still: "../assets/images/jackson/draft-night.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/draft-night.mp4",
+          focus: 0.45,
+          shade: [0.48, 0.55]
+        },
+        {
+          slug: "insyt-toll",
+          title: "insyt. — Toll",
+          kind: "Music Video · Dir. Mason Cline & Jackson McMurdo",
+          roles: "VFX, Colour Grading, Co-Editor, Title & Sound Design",
+          year: "2026",
+          still: "../assets/images/jackson/insyt-toll.jpg",
+          youtube: "chQBG5lTCnM",
+          focus: 0.45,
+          shade: [0.68, 0.72]
+        },
+        {
+          slug: "kai-banks-maze",
+          title: "Kai Banks — Maze",
+          kind: "Music Video · Dir. Mason Cline",
+          roles: "Title Card Design",
+          year: "2025",
+          still: "../assets/images/jackson/kai-banks-maze.jpg",
+          videoUrl: "https://mukpost.com/portfolio-assets/videos/kai-banks-maze-1080p.mp4",
+          focus: 0.48,
+          shade: [0.56, 0.59]
+        },
+        {
+          slug: "insyt-heal",
+          title: "insyt. — Heal",
+          kind: "Music Video · Dir. Mason Cline",
+          roles: "Custom Title Card Design",
+          year: "2026",
+          still: "../assets/images/jackson/insyt-heal.jpg",
+          youtube: "2i1VwJyLIs0",
+          focus: 0.45,
+          shade: [0.42, 0.52]
+        },
+        {
+          slug: "insyt-puppet-strings",
+          title: "insyt. — Puppet Strings",
+          kind: "Music Video · Dir. Mason Cline",
+          roles: "Title Design",
+          year: "2025",
+          still: "../assets/images/jackson/insyt-puppet-strings.jpg",
+          youtube: "6GvYSWZT93s",
+          focus: 0.42,
+          shade: [0.66, 0.66]
+        }
+      ]
+    };
+  </script>
+  <script src="../js/portfolio.js"></script>
 </body>
 </html>

@@ -1,0 +1,1213 @@
+/* ==========================================================================
+   PYLON PICTURES — Individual Artist Portfolio Template
+   Full System: Cinema Screen, Masthead, Hover Cue, Film Player, Info & Contact
+   ========================================================================== */
+
+:root {
+  --ink: #0d0d0e;
+  --black: #000000;
+  --paper: #f4f3ef;
+  --orange: #ff4d00;
+  --dim: rgba(244, 243, 239, 0.58);
+  --line: rgba(244, 243, 239, 0.22);
+  --surface: rgba(18, 18, 20, 0.72);
+
+  --edge: clamp(16px, 1.45vw, 28px);
+  --gap: clamp(10px, 1.25vw, 24px);
+  --cap: clamp(10.5px, 0.7vw, 12.5px);
+  --row: calc(var(--cap) * 1.76);
+  --name-size: clamp(38px, 5.05vw, 96px);
+  --mast-h: calc(var(--edge) * 2 + var(--name-size) * 0.86);
+
+  --font-display: "Archivo Black", system-ui, sans-serif;
+  --font-sans: "Archivo", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --shade-top: 0.54;
+  --shade-bot: 0.64;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--black);
+}
+
+body.page-portfolio {
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--black);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: var(--cap);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ol, ul { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button {
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+i { font-style: normal; }
+
+:focus-visible {
+  outline: 1px solid var(--orange);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--orange);
+  color: var(--paper);
+}
+
+[hidden] { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   SHARED 12-COLUMN GRID
+   -------------------------------------------------------------------------- */
+
+.mast,
+.cue,
+.film-strip,
+.band,
+.index-list a,
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+}
+
+/* --------------------------------------------------------------------------
+   FULL-BLEED CINEMA SCREEN & PLATES
+   -------------------------------------------------------------------------- */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--black);
+  overflow: hidden;
+}
+
+.fine [data-view="home"] .screen.is-live {
+  cursor: none;
+}
+
+.plates {
+  position: absolute;
+  inset: 0;
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity 0.45s var(--ease-inout), transform 6s var(--ease-out);
+  will-change: transform, opacity;
+}
+
+.plate.is-on {
+  opacity: 1;
+}
+
+.plate.is-opening-zoom {
+  transform: scale(1.065);
+}
+
+.plate__soft {
+  position: absolute;
+  left: -6%;
+  top: -6%;
+  width: 112%;
+  height: 112%;
+  object-fit: cover;
+  object-position: 50% calc(var(--fy, 0.45) * 100%);
+  filter: blur(34px) brightness(0.72);
+  pointer-events: none;
+}
+
+.plate__still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% calc(var(--fy, 0.45) * 100%);
+  opacity: 0;
+  transform: scale(1.005);
+  transition: opacity 0.5s var(--ease-inout), transform 18s ease-out;
+  pointer-events: none;
+}
+
+.plate.is-still .plate__still {
+  opacity: 1;
+  transform: scale(1.048);
+}
+
+.plate__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% calc(var(--fy, 0.45) * 100%);
+  opacity: 0;
+  transition: opacity 0.85s var(--ease-inout);
+  pointer-events: none;
+}
+
+.plate.is-playing .plate__video {
+  opacity: 1;
+}
+
+/* Black changeover curtain */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: var(--black);
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.55s var(--ease-inout);
+}
+
+.veil.is-fast {
+  transition: opacity 0.16s ease-in;
+}
+
+.veil.is-open {
+  opacity: 0;
+}
+
+.veil.is-opening-fade {
+  transition: opacity 2.1s var(--ease-inout);
+}
+
+/* Overlay dim when viewing Information or Contact */
+[data-view="information"] .veil,
+[data-view="contact"] .veil {
+  opacity: 0.88 !important;
+  transition: opacity 0.45s var(--ease-inout);
+}
+
+[data-view="film"] .veil {
+  opacity: 1 !important;
+  transition: opacity 0.3s ease;
+}
+
+/* Smooth full-bleed top & bottom vignette (no localized box shadows) */
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, var(--shade-top)) 0%,
+      rgba(0, 0, 0, calc(var(--shade-top) * 0.46)) 15%,
+      rgba(0, 0, 0, 0) 34%
+    ),
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, var(--shade-bot)) 0%,
+      rgba(0, 0, 0, calc(var(--shade-bot) * 0.72)) 35%,
+      rgba(0, 0, 0, 0) 70%
+    );
+}
+
+/* Crisp 1px micro-contrast for small body labels only — ZERO shadow on the display name */
+[data-view="home"] .mast-role,
+[data-view="home"] .mast-nav,
+[data-view="home"] .programme,
+[data-view="home"] .pointer {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+/* --------------------------------------------------------------------------
+   CUSTOM FLOATING CURSOR ("WATCH FILM")
+   -------------------------------------------------------------------------- */
+
+.pointer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 11;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.22s ease;
+  will-change: left, top, opacity;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--paper);
+}
+
+.pointer::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.pointer.is-on {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   MASTHEAD (12-COLUMN TOP BAR)
+   -------------------------------------------------------------------------- */
+
+.mast {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 14;
+  padding: var(--edge);
+  align-items: start;
+  pointer-events: none;
+}
+
+.mast > * {
+  pointer-events: auto;
+}
+
+/* Cols 1-7: Larger Artist Display Name, zero background/shadow box */
+.mast-name {
+  grid-column: 1 / span 7;
+  justify-self: start;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--name-size);
+  line-height: 0.84;
+  letter-spacing: -0.036em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-left: -0.03em;
+  margin-top: -0.055em;
+  text-shadow: none;
+  background: transparent;
+}
+
+.mast-name a {
+  display: block;
+}
+
+.mast-name__clip {
+  display: block;
+  overflow: visible;
+}
+
+body.is-opening .mast-name__clip {
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.mast-name__word {
+  display: block;
+  transform: translateY(0);
+  transition: transform 1.15s var(--ease-out);
+}
+
+/* Cols 8-10: Craft Roles & Location */
+.mast-role {
+  grid-column: 8 / span 3;
+  color: var(--paper);
+  line-height: 1.45;
+  transition: opacity 0.9s var(--ease-out);
+}
+
+.mast-role__loc {
+  display: block;
+  color: var(--dim);
+}
+
+/* Cols 11-12: Minimal Stacked Pylon Navigation */
+.mast-nav {
+  grid-column: 11 / span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  transition: opacity 0.9s var(--ease-out);
+}
+
+.mast-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  color: var(--dim);
+  transition: color 0.2s ease;
+}
+
+.mast-nav a:hover {
+  color: var(--paper);
+}
+
+.mast-nav a.is-on {
+  color: var(--paper);
+}
+
+.mast-nav a.is-on::before {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.mast-nav a.mast-nav__back {
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+
+.mast-nav a.mast-nav__back:hover {
+  color: var(--orange);
+}
+
+/* --------------------------------------------------------------------------
+   HOME VIEW: BOTTOM-LEFT PROGRAMME LIST & SLIDING CUE BAR
+   -------------------------------------------------------------------------- */
+
+.programme {
+  position: fixed;
+  left: var(--edge);
+  right: var(--edge);
+  bottom: calc(var(--edge) - 4px);
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+[data-view="home"] .programme {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.55s 0.15s ease, visibility 0s;
+}
+
+.programme-list {
+  width: calc((100% - 11 * var(--gap)) / 4 + 2 * var(--gap));
+  min-width: 260px;
+  pointer-events: auto;
+}
+
+.programme-row {
+  display: grid;
+  grid-template-columns: 2.7em minmax(0, 1fr);
+  align-items: center;
+  height: var(--row);
+  color: var(--dim);
+  white-space: nowrap;
+  transition: color 0.22s ease, opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+
+.programme-row i {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: inherit;
+  transition: color 0.15s ease;
+}
+
+.programme-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.programme-row:hover,
+.programme-row.is-on {
+  color: var(--paper);
+  transition-duration: 0.08s;
+}
+
+.programme-row:hover i,
+.programme-row.is-on i {
+  color: var(--orange);
+}
+
+/* Sliding horizontal project cue bar aligned with active row */
+.cue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--row);
+  align-items: center;
+  white-space: nowrap;
+  transform: translateY(calc(var(--i, 0) * var(--row)));
+  transition: transform 0.58s var(--ease-out), opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.cue.is-off {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.cue.is-instant {
+  transition: opacity 0.35s ease;
+}
+
+.cue__kind {
+  grid-column: 4 / span 3;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cue__roles {
+  grid-column: 7 / span 4;
+  color: var(--paper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cue__watch {
+  grid-column: 11 / span 2;
+  justify-self: start;
+  pointer-events: auto;
+  color: var(--paper);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--orange);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.cue__watch:hover {
+  color: var(--orange);
+  text-decoration-color: transparent;
+}
+
+.cue__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.cue__line i {
+  position: absolute;
+  inset: 0;
+  background: var(--orange);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+/* --------------------------------------------------------------------------
+   FILM VIEW (#/<project-slug>)
+   -------------------------------------------------------------------------- */
+
+.film {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: calc(var(--mast-h) + 8px) var(--edge) var(--edge);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+[data-view="film"] .film {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.65s 0.2s var(--ease-out), visibility 0s;
+}
+
+.film__frame {
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+
+.film__frame iframe,
+.film__frame video {
+  width: min(100cqw, 177.78cqh);
+  height: min(100cqh, 56.25cqw);
+  border: 0;
+  background: var(--black);
+  outline: none;
+}
+
+.film-strip {
+  align-items: start;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.film-strip__title {
+  grid-column: 1 / span 3;
+  display: grid;
+  grid-template-columns: 2.7em minmax(0, 1fr);
+  color: var(--paper);
+}
+
+.film-strip__title i {
+  font-family: var(--font-mono);
+  color: var(--orange);
+}
+
+.film-strip__kind {
+  grid-column: 4 / span 3;
+  color: var(--dim);
+}
+
+.film-strip__roles {
+  grid-column: 7 / span 4;
+  color: var(--paper);
+}
+
+.film-strip__nav {
+  grid-column: 11 / span 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.film-strip__nav a {
+  color: var(--dim);
+  transition: color 0.2s ease;
+}
+
+.film-strip__nav a:hover {
+  color: var(--orange);
+}
+
+/* --------------------------------------------------------------------------
+   INFORMATION OVERLAY (#/information)
+   -------------------------------------------------------------------------- */
+
+.info,
+.contact-view {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) calc(var(--mast-h) - 10px),
+    #000 calc(var(--mast-h) + 52px)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) calc(var(--mast-h) - 10px),
+    #000 calc(var(--mast-h) + 52px)
+  );
+}
+
+.info::-webkit-scrollbar,
+.contact-view::-webkit-scrollbar {
+  display: none;
+}
+
+[data-view="information"] .info {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.55s 0.15s ease, visibility 0s;
+}
+
+[data-view="contact"] .contact-view {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.55s 0.15s ease, visibility 0s;
+}
+
+.info__inner {
+  padding: clamp(200px, 34vh, 380px) var(--edge) calc(var(--edge) * 1.5);
+}
+
+.band {
+  align-items: start;
+}
+
+.band + .band {
+  margin-top: clamp(80px, 13vh, 150px);
+}
+
+.band__label {
+  grid-column: 1 / span 3;
+  color: var(--dim);
+}
+
+.bio {
+  grid-column: 4 / span 8;
+}
+
+.bio__sub {
+  color: var(--orange);
+  margin-bottom: 2em;
+}
+
+.bio p:not(.bio__sub) {
+  font-size: clamp(20px, 1.95vw, 31px);
+  font-weight: 400;
+  line-height: 1.24;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  color: var(--paper);
+  text-wrap: pretty;
+}
+
+.bio p:not(.bio__sub) + p {
+  margin-top: 0.9em;
+  text-indent: 2.2em;
+}
+
+.bio a {
+  text-decoration: underline 1px var(--orange);
+  text-underline-offset: 4px;
+  transition: color 0.2s ease;
+}
+
+.bio a:hover {
+  color: var(--orange);
+}
+
+/* 4-Column Facts Band */
+.band--facts {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.facts {
+  grid-column: span 3;
+}
+
+.facts h2 {
+  color: var(--dim);
+  margin-bottom: 1.3em;
+}
+
+.facts li + li {
+  margin-top: 5px;
+}
+
+.facts a {
+  text-decoration: underline 1px transparent;
+  text-underline-offset: 4px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.facts a:hover {
+  color: var(--orange);
+  text-decoration-color: var(--orange);
+}
+
+/* Full Clickable Credits Index Table */
+.band--index .band__label {
+  grid-column: 1 / -1;
+  margin-bottom: 12px;
+}
+
+.index-list {
+  grid-column: 1 / -1;
+}
+
+.index-list a {
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  transition: color 0.2s ease;
+}
+
+.index-list li:last-child a {
+  border-bottom: 1px solid var(--line);
+}
+
+.index-list__title {
+  grid-column: 1 / span 3;
+  display: grid;
+  grid-template-columns: 2.7em minmax(0, 1fr);
+}
+
+.index-list__title i {
+  font-family: var(--font-mono);
+  color: var(--orange);
+}
+
+.index-list__kind {
+  grid-column: 4 / span 3;
+  color: var(--dim);
+}
+
+.index-list__roles {
+  grid-column: 7 / span 4;
+}
+
+.index-list__watch {
+  grid-column: 11 / span 2;
+  color: var(--dim);
+  transition: color 0.2s ease;
+}
+
+@media (hover: hover) {
+  .index-list:hover a {
+    color: var(--dim);
+  }
+  .index-list a:hover {
+    color: var(--paper);
+  }
+  .index-list a:hover .index-list__watch {
+    color: var(--orange);
+  }
+}
+
+.band--foot {
+  color: var(--dim);
+  padding-top: 16px;
+}
+
+.band--foot p {
+  grid-column: 1 / span 6;
+}
+
+.band--foot button {
+  grid-column: 11 / span 2;
+  justify-self: start;
+  color: var(--dim);
+  transition: color 0.2s ease;
+}
+
+.band--foot button:hover {
+  color: var(--orange);
+}
+
+/* --------------------------------------------------------------------------
+   IN-SITE CONTACT FORM VIEW (#/contact)
+   -------------------------------------------------------------------------- */
+
+.contact-view__inner {
+  padding: clamp(165px, 24vh, 250px) var(--edge) calc(var(--edge) * 2);
+}
+
+.contact-meta {
+  grid-column: 1 / span 3;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.contact-meta__label {
+  color: var(--orange);
+}
+
+.contact-meta__heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 2.5vw, 40px);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+}
+
+.contact-meta__detail {
+  color: var(--dim);
+  line-height: 1.6;
+}
+
+.copy-email-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.copy-email-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.contact-form-wrap {
+  grid-column: 5 / span 7;
+}
+
+.contact-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px var(--gap);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  color: var(--dim);
+  font-size: var(--cap);
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0 12px;
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 1.2vw, 19px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--paper);
+  border-radius: 0;
+  transition: border-color 0.2s ease;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(244, 243, 239, 0.28);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-bottom-color: var(--orange);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.45;
+}
+
+/* Interactive Discipline Scope Pills */
+.scope-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.scope-pill {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.scope-pill:hover {
+  border-color: var(--paper);
+  color: var(--paper);
+}
+
+.scope-pill.is-selected {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--paper);
+}
+
+.contact-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.contact-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 26px;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.contact-submit:hover {
+  background: var(--orange);
+  color: var(--paper);
+}
+
+.contact-submit[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.contact-status {
+  color: var(--dim);
+  text-transform: none;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+.contact-status.is-success {
+  color: #34d399;
+}
+
+.contact-status.is-error {
+  color: var(--orange);
+}
+
+/* --------------------------------------------------------------------------
+   OPENING ANIMATION INITIAL STATES (.is-opening)
+   -------------------------------------------------------------------------- */
+
+.js body.is-opening .mast-name__word {
+  transform: translateY(118%);
+}
+
+.js body.is-opening .mast-role,
+.js body.is-opening .mast-nav {
+  opacity: 0;
+}
+
+.js body.is-opening .programme-row {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* --------------------------------------------------------------------------
+   MEDIUM DESKTOP (961px - 1260px)
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 961px) and (max-width: 1260px) {
+  :root {
+    --name-size: clamp(34px, 4.7vw, 68px);
+  }
+  .cue {
+    grid-template-columns: calc((100% - 11 * var(--gap)) / 4 + 2 * var(--gap)) max-content minmax(0, 1fr) max-content;
+  }
+  .cue__kind { grid-column: 2; padding-right: 1.4em; }
+  .cue__roles { grid-column: 3; }
+  .cue__watch { grid-column: 4; }
+}
+
+/* --------------------------------------------------------------------------
+   TABLET & MOBILE (<= 960px)
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 960px) {
+  :root {
+    --cap: 11px;
+    --row: 24px;
+    --name-size: clamp(36px, 10vw, 72px);
+    --mast-h: calc(var(--edge) + var(--name-size) * 0.9 + 84px);
+  }
+
+  .mast {
+    row-gap: 14px;
+  }
+
+  .mast-name {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
+
+  .mast-role {
+    grid-column: 1 / span 7;
+  }
+
+  .mast-nav {
+    grid-column: 8 / span 5;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .mast-nav a.is-on::before {
+    position: static;
+    transform: none;
+  }
+
+  .programme {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .programme-list {
+    width: 100%;
+    max-height: 44dvh;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .programme-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cue {
+    position: relative;
+    height: auto;
+    transform: none !important;
+    white-space: normal;
+    row-gap: 3px;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+  }
+
+  .cue__kind {
+    grid-area: 1 / 1 / auto / span 9;
+  }
+
+  .cue__roles {
+    grid-area: 2 / 1 / auto / span 9;
+  }
+
+  .cue__watch {
+    grid-area: 1 / 10 / span 2 / span 3;
+    place-self: center end;
+    padding: 8px 0;
+  }
+
+  .film-strip {
+    row-gap: 4px;
+  }
+
+  .film-strip__title {
+    grid-column: 1 / span 8;
+  }
+
+  .film-strip__nav {
+    grid-area: 1 / 9 / auto / span 4;
+    justify-content: flex-end;
+  }
+
+  .film-strip__kind,
+  .film-strip__roles {
+    grid-column: 1 / -1;
+  }
+
+  .info__inner,
+  .contact-view__inner {
+    padding-top: calc(var(--mast-h) + 56px);
+  }
+
+  .band__label,
+  .bio,
+  .contact-meta,
+  .contact-form-wrap {
+    grid-column: 1 / -1;
+  }
+
+  .band__label {
+    margin-bottom: 14px;
+  }
+
+  .bio p:not(.bio__sub) + p {
+    text-indent: 1.4em;
+  }
+
+  .band--facts {
+    row-gap: 28px;
+  }
+
+  .facts {
+    grid-column: span 6;
+  }
+
+  .index-list a {
+    row-gap: 3px;
+    padding: 11px 0;
+  }
+
+  .index-list__title {
+    grid-column: 1 / span 9;
+  }
+
+  .index-list__watch {
+    grid-area: 1 / 10 / auto / span 3;
+    justify-self: end;
+  }
+
+  .index-list__kind {
+    grid-column: 1 / -1;
+    padding-left: 2.7em;
+  }
+
+  .index-list__roles {
+    display: none;
+  }
+
+  .contact-form {
+    grid-template-columns: 1fr;
+    margin-top: 32px;
+  }
+
+  .contact-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate,
+  .plate__still,
+  .plate__video,
+  .veil,
+  .cue,
+  .mast-name__word,
+  .mast-role,
+  .mast-nav,
+  .programme-row {
+    transition: none !important;
+  }
+}
