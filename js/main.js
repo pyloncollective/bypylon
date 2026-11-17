@@ -100,13 +100,28 @@
 
   const params = new URLSearchParams(location.search);
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const shouldSkip = params.has('skip') || params.has('role') || Boolean(location.hash) || reduced;
 
-  // Wait for webfonts so the flash never shows fallback type.
-  const ready = document.fonts ? document.fonts.ready : Promise.resolve();
+  // Preload & decode the SVG vector marks so every 110ms cut is instant.
+  const preloadLogos = () => {
+    if (shouldSkip) return Promise.resolve();
+    const srcs = logos
+      .map((node) => node.querySelector('img')?.getAttribute('src'))
+      .filter(Boolean);
+    const jobs = srcs.map((src) => new Promise((resolve) => {
+      const im = new Image();
+      im.onload = () => (im.decode ? im.decode().catch(() => {}).finally(resolve) : resolve());
+      im.onerror = resolve;
+      im.src = src;
+    }));
+    return Promise.race([Promise.all(jobs), wait(1200)]);
+  };
 
-  ready.then(() => {
+  const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
+
+  Promise.all([fontsReady, preloadLogos()]).then(() => {
     if (intro.classList.contains('is-done')) return; // already tapped to skip
-    if (params.has('skip') || params.has('role') || location.hash || reduced) skip();
+    if (shouldSkip) skip();
     else play();
   });
 
