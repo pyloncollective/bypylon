@@ -1,8 +1,8 @@
-# Pylon Collective — `04 | Tech, Web & Post` Team Setup & Live Build Guide
-**Master Studio Email:** `pylon.collective@gmail.com`  
-**GitHub Account:** `pyloncollective` (`https://github.com/pyloncollective/bypylon`)  
+# Pylon Pictures — `04 | Tech, Web & Post` Team Setup & Live Build Guide
+**Master Studio Email:** `admin@pylonpictures.com` (Legacy: `pylon.collective@gmail.com`)  
+**GitHub Account:** `pyloncollective` -> `pylonpictures` (`https://github.com/pyloncollective/bypylon`)  
 **Cloudflare Account:** `pylon.collective@gmail.com`  
-**Production Website:** `https://bypylon.com`  
+**Production Website:** `https://pylonpictures.com`  
 **Core Team:** Jackson McMurdo, Dario Butera, Jessica Binns  
 
 ---
@@ -39,12 +39,12 @@ gh auth login -h github.com -p https -w
 ---
 
 ## Step 4: The 3-Person Vibe-Coding Loop
-Whenever any of you wants to update `bypylon.com`:
+Whenever any of you wants to update `pylonpictures.com`:
 
 1. **Pull Latest Changes First:**
    Tell Antigravity: *"Pull the latest changes from GitHub"* (`git pull origin main`).
 2. **Vibe-Code & Preview Locally:**
    Tell Antigravity what layout, animation, or section to build, and preview it at **`http://localhost:8000`** (`python3 -m http.server 8000`).
-3. **Push Live to `bypylon.com`:**
+3. **Push Live to `pylonpictures.com`:**
    Tell Antigravity: *"Commit and push my changes to main"* (`git add . && git commit -m "Update" && git push origin main`).
-   Within **30–45 seconds**, it goes live at **`https://bypylon.com`**!
+   Within **30–45 seconds**, it goes live at **`https://pylonpictures.com`**!

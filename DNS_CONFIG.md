@@ -1,48 +1,73 @@
-# bypylon.com — Master DNS & Domain Configuration
+# pylonpictures.com — Master DNS, GitHub Pages & Google Workspace Configuration
 
-**Domain:** `bypylon.com`  
+**Primary Domain:** `pylonpictures.com`  
 **Registrar:** Spaceship (Namecheap Inc.)  
-**Purchase Date:** October 24, 2026 (1-Year Registration, Renews Oct 24, 2027)  
-**Order ID:** `a7fe03b4-df18-4412-9e01-ad12aef148db`  
-**Receipt Number:** `QR-202610242258027`  
-**Owner / Contact:** Jackson McMurdo (`mcmurdo.jackson@gmail.com`)  
-**Target Hosting:** GitHub Pages (Free SSL, Global CDN)
+**Registration Date:** November 16, 2026 (Active through Nov 17, 2027)  
+**Secondary / Redirect Domains:** `bypylon.com` (Spaceship, exp Oct 24, 2027 — 301 Redirect), `pyloncollective.com` (Squarespace legacy, exp Sep 2027)  
+**Owner / Technical Lead:** Jackson McMurdo (`mcmurdo.jackson@gmail.com`)  
+**Target Hosting:** GitHub Pages ($0/mo, Automated Let's Encrypt SSL)  
+**Email Infrastructure:** Google Workspace Business Starter (1 Admin Seat + Free Google Groups Routing)
 
 ---
 
-## 🌐 Required DNS Records for GitHub Pages
+## 1. GitHub Pages DNS Records (Spaceship -> Advanced DNS)
 
-To point `bypylon.com` directly to GitHub Pages, log into **Spaceship** → **Domain List** → **bypylon.com** → **Advanced DNS** (or DNS Manager), and add the following 5 records:
+Verified live on `launch1.spaceship.net` / `launch2.spaceship.net`:
 
-### 1. Apex Domain (A Records)
-Add four `A` records pointing `@` (or blank root) to GitHub's Anycast IP addresses:
-
-| Type | Host / Name | Value / Points To | TTL | Purpose |
+### Apex Domain (`A` Records)
+| Type | Host / Name | Value / Points To | TTL | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **A** | `@` | `185.199.108.153` | Automatic / 1 Hour | GitHub Pages Anycast Node 1 |
-| **A** | `@` | `185.199.109.153` | Automatic / 1 Hour | GitHub Pages Anycast Node 2 |
-| **A** | `@` | `185.199.110.153` | Automatic / 1 Hour | GitHub Pages Anycast Node 3 |
-| **A** | `@` | `185.199.111.153` | Automatic / 1 Hour | GitHub Pages Anycast Node 4 |
+| **A** | `@` | `185.199.108.153` | Automatic / 30m | Live |
+| **A** | `@` | `185.199.109.153` | Automatic / 30m | Live |
+| **A** | `@` | `185.199.110.153` | Automatic / 30m | Live |
+| **A** | `@` | `185.199.111.153` | Automatic / 30m | Live |
 
-### 2. Subdomain (CNAME Record)
-Add one `CNAME` record to route `www.bypylon.com` to your GitHub Pages URL:
-
-| Type | Host / Name | Value / Points To | TTL | Purpose |
+### Subdomain (`CNAME` Record)
+| Type | Host / Name | Value / Points To | TTL | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| **CNAME** | `www` | `pyloncollective.github.io` | Automatic / 1 Hour | Routes www to GitHub Pages |
+| **CNAME** | `www` | `pylonpictures.github.io` | Automatic / 30m | Rename GitHub account `pyloncollective` -> `pylonpictures` so username matches 1:1 |
 
 ---
 
-## 🔒 SSL / HTTPS Security Settings
-* **Certificate Authority:** Let's Encrypt (automatically provisioned for free by GitHub Pages).
-* **Enforce HTTPS:** Once DNS propagates, check **"Enforce HTTPS"** in GitHub repository settings.
-* **CAA Records:** Not required (default Spaceship CAA allows Let's Encrypt).
+## 2. Google Workspace DNS Records (Spaceship -> Advanced DNS)
+
+Add these records alongside the GitHub Pages `A` and `CNAME` records (do **not** delete the four `185.199.xxx.153` `A` records):
+
+| Type | Host / Name | Value / Points To | Priority | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **TXT** | `@` | `google-site-verification=<token>` | — | Google Workspace domain ownership verification |
+| **MX** | `@` | `smtp.google.com` | `1` | Routes all `@pylonpictures.com` inbound mail to Google Workspace |
+| **TXT** | `@` | `v=spf1 include:_spf.google.com ~all` | — | SPF anti-spoofing (keeps outbound emails out of spam) |
+| **TXT** | `google._domainkey` | `v=DKIM1; k=rsa; p=<generated-in-admin>` | — | Generate inside `admin.google.com` -> Apps -> Gmail -> Authenticate email |
+| **TXT** | `_dmarc` | `v=DMARC1; p=none; rua=mailto:admin@pylonpictures.com` | — | Basic DMARC alignment required by Gmail/Yahoo |
 
 ---
 
-## 📧 Email DNS (When Setting up Google Workspace or Forwarding)
-When you're ready to activate `contact@bypylon.com` or `jackson@bypylon.com`, add:
-* **Spaceship Free Email Forwarding** (zero cost):
-  Forward `contact@bypylon.com` → `pylon.collective@gmail.com`
-  Forward `jackson@bypylon.com` → `mcmurdo.jackson@gmail.com`
-  *(Takes 60 seconds inside Spaceship dashboard under "Email Forwarding").*
+## 3. Single-Seat Google Workspace + Google Groups Architecture
+
+1. **Create Only 1 Paid Seat:** Use `admin@pylonpictures.com` (or `studio@pylonpictures.com`) as the single paid Business Starter license (`~$11 CAD/mo`).
+2. **Enable External Posting on Every Group (Critical):**
+   * In `admin.google.com` -> **Directory -> Groups -> Create group**:
+   * Under **Access settings**, check **"External -> Anyone on the web -> Publish posts"** AND **"Allow members outside your organization"**. *(If "Anyone on the web -> Publish posts" is left unchecked, outside clients emailing `@pylonpictures.com` will get a bounce error).*
+
+### Shared Studio Inboxes (Google Groups)
+* `contact@pylonpictures.com` -> General inquiries (`03 | Operations` + `01 | Client & Outreach`: Maya, Justin, Declan, Misan, Mason, Jackson)
+* `workwithus@pylonpictures.com` -> Commercial & music video inbound (`01 | Client & Outreach`: Declan, Misan, Mason, Justin)
+
+### 11-Member `@pylonpictures.com` Routing Directory (Copy-Paste Ready)
+
+| Group Email (`@pylonpictures.com`) | Member Name | Destination Personal Email |
+| :--- | :--- | :--- |
+| `mason@pylonpictures.com` | Mason Cline | `Clinemase5@gmail.com` |
+| `jackson@pylonpictures.com` | Jackson McMurdo | `mcmurdo.jackson@gmail.com` |
+| `declan@pylonpictures.com` | Declan McKenna | `Declanfmckenna@gmail.com` |
+| `maya@pylonpictures.com` | Maya Chariandy | `mayachariandy@gmail.com` |
+| `jordan@pylonpictures.com` | Jordan Wong | `jordanmkwong@gmail.com` |
+| `dario@pylonpictures.com` | Dario Butera | `dariob99@icloud.com` |
+| `dickson@pylonpictures.com` | Dickson Ntiamoah | `dntiamoah8@gmail.com` |
+| `jess@pylonpictures.com` *(alias `jessica@`)* | Jessica Binns | `jessbinnss@gmail.com` |
+| `daniel@pylonpictures.com` | Daniel Fusco | `daniel.fusco.04@gmail.com` |
+| `misan@pylonpictures.com` | Misan Edema | `misanedema38@gmail.com` |
+| `justin@pylonpictures.com` | Justin Tan | `justin.c.tan2004@gmail.com` |
+
+*(Optional: each member can also configure Gmail "Send mail as" via SMTP or reply directly once added to their personal group).*
