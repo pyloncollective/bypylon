@@ -19,12 +19,12 @@
     <div class="pass-card">
       <div class="pass-stripes" aria-hidden="true"></div>
       <div class="pass-head mono">
-        <span>Pylon Pictures · V1 Site Build</span>
+        <span>Pylon Pictures · Cinema Programme Theme</span>
         <span class="pass-badge">Crew Access</span>
       </div>
       <div class="pass-body">
         <h1 class="pass-title">Backstage<br>Roster Builder</h1>
-        <p class="pass-sub">Sign in with your first name and personal crew pass to shape your official <strong>pylonpictures.com</strong> portfolio page. Save step-by-step anytime.</p>
+        <p class="pass-sub">Sign in with your first name and personal crew pass to build your full-bleed <strong>pylonpictures.com</strong> cinema portfolio — opening video loop, hoverable credits, bio &amp; in-site contact form.</p>
 
         <form class="pass-form" id="loginForm" autocomplete="on">
           <div class="field">
@@ -44,7 +44,7 @@
       </div>
       <div class="pass-foot mono">
         <a href="../index.html?skip">&larr; pylonpictures.com</a>
-        <span>11 / 11 Ensemble</span>
+        <a href="../roster/jackson-mcmurdo.html" target="_blank" rel="noopener" style="color:var(--orange);">See Theme Example &nearr;</a>
       </div>
     </div>
   </section>
@@ -64,7 +64,9 @@
         </span>
       </div>
       <div class="topbar-right">
-        <button type="button" class="btn btn-sm" id="togglePreviewBtn">Live Page Preview</button>
+        <button type="button" class="btn btn-sm" id="expandPreviewBtn" title="Open full-size interactive preview">Fullscreen Preview</button>
+        <button type="button" class="btn btn-sm" id="togglePreviewBtn">Toggle Sidebar</button>
+        <button type="button" class="btn btn-sm" id="exportHtmlBtn" hidden title="Admin: Export ready-to-deploy HTML page">Export HTML</button>
         <button type="button" class="btn btn-sm" id="exportJsonBtn" title="Download backup JSON">Export JSON</button>
         <button type="button" class="btn btn-sm btn-primary" id="syncNowBtn">Save &amp; Sync</button>
         <button type="button" class="btn btn-sm" id="logoutBtn">Log Out</button>
@@ -76,7 +78,7 @@
       <aside class="rail">
         <div class="progress-box">
           <div class="progress-top mono">
-            <span>Page Readiness</span>
+            <span>Theme Readiness</span>
             <strong id="readinessPct">0%</strong>
           </div>
           <div class="progress-track">
@@ -87,7 +89,7 @@
         <ul class="step-nav" id="stepNav"></ul>
 
         <div class="rail-note">
-          Fill out one section or all seven — every edit saves automatically in your browser and syncs to the <strong>04 | Tech &amp; Web</strong> build sheet whenever you hit <strong>Save &amp; Sync</strong>.
+          Every Pylon member page now runs on our unified <strong>Full-Bleed Cinema Programme</strong> theme (<a href="../roster/jackson-mcmurdo.html" target="_blank" rel="noopener" style="color:var(--orange);">see Jackson's live page &nearr;</a>). Hover and click inside the preview on the right anytime to test your page.
         </div>
       </aside>
 
@@ -104,59 +106,152 @@
         <div class="step-footer">
           <button type="button" class="btn" id="prevStepBtn">&larr; Previous</button>
           <div class="step-footer-right">
-            <button type="button" class="btn" id="saveStepOnlyBtn">Save Step Draft</button>
+            <button type="button" class="btn" id="saveStepOnlyBtn">Save Draft</button>
             <button type="button" class="btn btn-primary" id="nextStepBtn">Save &amp; Next Step &rarr;</button>
           </div>
         </div>
       </main>
 
-      <!-- RIGHT LIVE PROFILE PREVIEW -->
+      <!-- RIGHT LIVE CINEMA THEME PREVIEW -->
       <aside class="preview-pane" id="previewPane">
         <div class="preview-head mono">
-          <span>Live Roster Preview</span>
-          <a id="liveSiteLink" href="../roster/jackson-mcmurdo.html" target="_blank" rel="noopener" style="color:var(--orange); text-decoration:none;">Current Live Page &nearr;</a>
+          <span>Interactive Theme Preview</span>
+          <div class="preview-head-actions">
+            <a href="../roster/jackson-mcmurdo.html" target="_blank" rel="noopener" class="preview-ref-link">Theme Ref &nearr;</a>
+            <button type="button" class="preview-expand-chip mono" id="sidebarExpandBtn">Expand &nearr;</button>
+          </div>
         </div>
 
-        <div class="mock-page">
-          <div class="mock-url mono" id="mockUrl">pylonpictures.com/roster/—</div>
-          <div class="mock-top">
-            <div>
-              <div class="mock-name" id="mockName">—</div>
-              <div class="mock-headline" id="mockHeadline">—</div>
-            </div>
-            <div class="mock-portrait-slot mono">Headshot<br>Jan 2027</div>
-          </div>
-          <div class="mock-logline" id="mockLogline" hidden></div>
-          <div class="mock-bio" id="mockBio">Your artist bio will appear right here as you type...</div>
+        <div class="preview-tabs mono" id="previewTabBar">
+          <button type="button" class="preview-tab is-active" data-pview="home">Work (Screen)</button>
+          <button type="button" class="preview-tab" data-pview="information">Information</button>
+          <button type="button" class="preview-tab" data-pview="contact">Contact Form</button>
+        </div>
 
-          <div class="mock-grid">
-            <div class="mock-cell">
-              <h4 class="mono">Primary Craft</h4>
-              <p id="mockPrimary">—</p>
+        <!-- Miniature 16:10 Interactive Cinema Stage -->
+        <div class="cinema-stage-wrap" id="sidebarStageMount">
+          <div class="cinema-stage" id="cinemaStage" data-pview="home">
+            <div class="cs-screen">
+              <img class="cs-still" id="csStill" src="../assets/images/home-reel-colour-poster.jpg" alt="">
+              <video class="cs-video" id="csVideo" src="../assets/videos/home-reel-colour.mp4" muted loop playsinline autoplay></video>
+              <div class="cs-veil" id="csVeil"></div>
+              <div class="cs-shade"></div>
             </div>
-            <div class="mock-cell">
-              <h4 class="mono">Additional</h4>
-              <p id="mockSecondary">—</p>
-            </div>
-            <div class="mock-cell">
-              <h4 class="mono">Kit / Tools</h4>
-              <p id="mockGear">—</p>
-            </div>
-            <div class="mock-cell">
-              <h4 class="mono">Direct</h4>
-              <p id="mockContact">—</p>
-            </div>
-          </div>
 
-          <div class="mock-links" id="mockLinks"></div>
+            <!-- 12-Col Masthead inside Stage -->
+            <header class="cs-mast">
+              <div class="cs-name" id="csName" title="Click to reset to opening loop">Mason Cline</div>
+              <div class="cs-role">
+                <span id="csRoleLine">Director · Photographer · Writer</span>
+                <span class="cs-loc" id="csLocation">Toronto</span>
+              </div>
+              <nav class="cs-nav">
+                <span class="cs-nav-back">&larr; Roster</span>
+                <button type="button" data-csnav="home" class="is-on">Work</button>
+                <button type="button" data-csnav="information">Information</button>
+                <button type="button" data-csnav="contact">Contact</button>
+              </nav>
+            </header>
 
-          <div class="mock-works">
-            <div class="mock-works-title mono">Featured Credits (<span id="mockWorksCount">0</span>)</div>
-            <div id="mockWorksList"></div>
+            <!-- HOME VIEW: Bottom-left Programme + Hover Cue -->
+            <div class="cs-programme" id="csProgramme">
+              <ol class="cs-list" id="csList"></ol>
+              <div class="cs-cue is-off" id="csCue">
+                <div class="cs-cue-kind" id="csCueKind"></div>
+                <div class="cs-cue-roles" id="csCueRoles"></div>
+                <button type="button" class="cs-cue-watch" id="csCueWatch">Watch film</button>
+                <span class="cs-cue-line"></span>
+              </div>
+            </div>
+
+            <!-- FILM PLAYER VIEW -->
+            <div class="cs-film" id="csFilm">
+              <div class="cs-film-frame" id="csFilmFrame"></div>
+              <div class="cs-film-strip">
+                <div class="cs-film-title"><i id="csFilmNo">01</i><span id="csFilmTitle">—</span></div>
+                <div class="cs-film-kind" id="csFilmKind">—</div>
+                <div class="cs-film-roles" id="csFilmRoles">—</div>
+                <div class="cs-film-actions">
+                  <button type="button" id="csFilmNext">Next</button>
+                  <button type="button" id="csFilmClose">Close</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- INFORMATION OVERLAY VIEW -->
+            <div class="cs-info" id="csInfo">
+              <div class="cs-info-inner">
+                <div class="cs-info-bio-band">
+                  <div class="cs-band-label">Biography</div>
+                  <div class="cs-bio-content">
+                    <div class="cs-bio-sub" id="csBioSub">Pylon Pictures</div>
+                    <div class="cs-bio-text" id="csBioText">Your artist biography appears here...</div>
+                  </div>
+                </div>
+
+                <div class="cs-facts-grid" id="csFactsGrid"></div>
+
+                <div class="cs-index-band">
+                  <div class="cs-band-label" style="margin-bottom:6px;">Selected Credits Index</div>
+                  <div id="csIndexRows"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- IN-SITE CONTACT FORM VIEW -->
+            <div class="cs-contact" id="csContact">
+              <div class="cs-contact-inner">
+                <div class="cs-contact-left">
+                  <div class="cs-contact-kicker">Direct Inquiry</div>
+                  <div class="cs-contact-heading" id="csContactHeading">Work with Mason</div>
+                  <div class="cs-contact-note" id="csContactNote">Commercial direction, narrative, music video, or Pylon production inquiries. Sends directly from this page.</div>
+                  <div class="cs-copy-pill" id="csCopyEmail">mason@pylonpictures.com · Copy</div>
+                </div>
+                <div class="cs-contact-right">
+                  <div class="cs-fake-row">
+                    <div class="cs-fake-field"><span>Your Name *</span><i>Jane Doe</i></div>
+                    <div class="cs-fake-field"><span>Your Email *</span><i>jane@agency.com</i></div>
+                  </div>
+                  <div class="cs-fake-row">
+                    <div class="cs-fake-field"><span>Project / Production</span><i>Brand Campaign...</i></div>
+                    <div class="cs-fake-field"><span>Target Timeline</span><i>Q1 2027</i></div>
+                  </div>
+                  <div class="cs-fake-scopes">
+                    <span>Disciplines Needed</span>
+                    <div class="cs-scope-chips" id="csScopeChips"></div>
+                  </div>
+                  <div class="cs-fake-field"><span>Project Brief &amp; Notes *</span><i>Share links, deliverables, or schedule details...</i></div>
+                  <div><span class="cs-send-btn">Send Inquiry</span></div>
+                </div>
+              </div>
+            </div>
+
           </div>
+        </div>
+
+        <p class="preview-hint mono" id="previewHint">Tip: Hover any numbered credit in the frame above to test the cue bar &amp; background swap, or click to test the player.</p>
+
+        <!-- Theme Component Checklist -->
+        <div class="theme-checklist" id="themeChecklist"></div>
+
+        <div class="preview-foot mono">
+          <span id="mockUrl">pylonpictures.com/roster/—</span>
+          <a id="liveSiteLink" href="../roster/jackson-mcmurdo.html" target="_blank" rel="noopener" style="color:var(--orange); text-decoration:none;">Current Live URL &nearr;</a>
         </div>
       </aside>
     </div>
+  </div>
+
+  <!-- FULLSCREEN INTERACTIVE CINEMA MODAL -->
+  <div class="fs-modal" id="fsModal" hidden>
+    <div class="fs-modal-bar mono">
+      <span>Fullscreen Cinema Theme Preview &middot; <strong id="fsMemberName" style="color:var(--white);">—</strong></span>
+      <div class="fs-modal-actions">
+        <span>Hover credits, click a film, or switch Work / Information / Contact</span>
+        <button type="button" class="btn btn-sm btn-primary" id="closeFsModalBtn">Close Fullscreen (Esc)</button>
+      </div>
+    </div>
+    <div class="fs-stage-host" id="fsStageMount"></div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">Saved</div>
@@ -164,4 +259,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
