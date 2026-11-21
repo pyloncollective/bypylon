@@ -12,7 +12,7 @@
 
   // Google Apps Script Web App URL tied to Sheet 11UP6yDEN0-DvDxrsiEeVINW_E6orUm4Q70mYz9zKlOo
   // Reads from shared js/analytics.js config first so you only update it in one place.
-  const CLOUD_ENDPOINT = '';
+  const CLOUD_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyB9xsyedDeQ6SMAFK9YR4eY-yRtDkrBDT-GCP6RDiiEom9H7F5spgCj0ueQEsnLo4mzg/exec';
 
   function getCloudEndpoint() {
     return (window.PYLON_ANALYTICS_CONFIG && window.PYLON_ANALYTICS_CONFIG.CLOUD_ENDPOINT) || CLOUD_ENDPOINT;

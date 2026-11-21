@@ -8,7 +8,7 @@
 
   // Central config: update these two values once deployed
   const CONFIG = {
-    CLOUD_ENDPOINT: '',   // Google Apps Script Web App (/exec) URL
+    CLOUD_ENDPOINT: 'https://script.google.com/macros/s/AKfycbyB9xsyedDeQ6SMAFK9YR4eY-yRtDkrBDT-GCP6RDiiEom9H7F5spgCj0ueQEsnLo4mzg/exec',   // Google Apps Script Web App (/exec) URL
     CF_BEACON_TOKEN: '98823fa98d0c4355a6c3892e8f8ccb8b'   // Cloudflare Web Analytics site token
   };
 
