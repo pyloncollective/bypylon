@@ -11,7 +11,26 @@
   const SESSION_KEY = 'pylon_portal_session_v1';
 
   // Google Apps Script Web App URL tied to Sheet 11UP6yDEN0-DvDxrsiEeVINW_E6orUm4Q70mYz9zKlOo
+  // Reads from shared js/analytics.js config first so you only update it in one place.
   const CLOUD_ENDPOINT = '';
+
+  function getCloudEndpoint() {
+    return (window.PYLON_ANALYTICS_CONFIG && window.PYLON_ANALYTICS_CONFIG.CLOUD_ENDPOINT) || CLOUD_ENDPOINT;
+  }
+
+  function logCrewActivity(eventAction, detail = '') {
+    if (window.pylonAnalytics && window.pylonAnalytics.trackPortalEvent) {
+      const m = activeMemberKey ? CREW[activeMemberKey] : null;
+      const stepObj = STEPS[currentStepIdx];
+      window.pylonAnalytics.trackPortalEvent({
+        username: loggedInUser || activeMemberKey || '',
+        fullName: (loggedInUser && CREW[loggedInUser] ? CREW[loggedInUser].name : (m ? m.name : '')),
+        eventAction,
+        step: stepObj ? `${stepObj.num} ${stepObj.title}` : '',
+        detail
+      });
+    }
+  }
 
   // No stock/fallback imagery: a member's page only shows stills, posters, or
   // reels they have explicitly chosen themselves. Empty = clean black screen.
@@ -456,13 +475,16 @@
 
   async function syncToCloud(showToastMsg = true) {
     saveLocalState();
-    if (!CLOUD_ENDPOINT) {
+    const endpoint = getCloudEndpoint();
+    if (!endpoint) {
       if (showToastMsg) showToast('Saved to browser (Cinema Theme synced)');
       return;
     }
     try {
       setStatus('Syncing to Pylon Sheet...', true);
-      await fetch(CLOUD_ENDPOINT, {
+      const stepsDone = `${countCompletedSteps(state)}/${STEPS.length}`;
+      const readiness = computeReadinessPct(state);
+      await fetch(endpoint, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -470,11 +492,12 @@
           action: 'upsert',
           username: activeMemberKey,
           fullName: CREW[activeMemberKey].name,
-          stepsCompleted: `${countCompletedSteps(state)}/${STEPS.length}`,
-          readinessPct: computeReadinessPct(state),
+          stepsCompleted: stepsDone,
+          readinessPct: readiness,
           payload: state
         })
       });
+      logCrewActivity('save_draft', `Readiness ${readiness}% · Steps ${stepsDone} · Projects ${(state.projects || []).filter(p => p.title && p.title.trim()).length}`);
       const t = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
       setStatus(`Synced to Pylon Sheet · ${t}`, false);
       if (showToastMsg) showToast('Synced to Pylon Web Team');
@@ -485,9 +508,10 @@
   }
 
   async function tryFetchCloudDraft(memberKey) {
-    if (!CLOUD_ENDPOINT) return;
+    const endpoint = getCloudEndpoint();
+    if (!endpoint) return;
     try {
-      const res = await fetch(`${CLOUD_ENDPOINT}?username=${encodeURIComponent(memberKey)}`);
+      const res = await fetch(`${endpoint}?username=${encodeURIComponent(memberKey)}`);
       if (!res.ok) return;
       const json = await res.json();
       if (json && json.payload && json.payload.updatedAt) {
@@ -2057,24 +2081,47 @@
 
     if (!CREW[user]) {
       errEl.hidden = false;
+      if (window.pylonAnalytics && window.pylonAnalytics.trackPortalEvent) {
+        window.pylonAnalytics.trackPortalEvent({
+          username: user || '(blank)',
+          fullName: 'Unknown',
+          eventAction: 'login_failed',
+          step: 'Login Gate',
+          detail: 'Unknown username'
+        });
+      }
       return;
     }
 
     const digest = await sha256Hex(`${SALT}${user}::${pw}`);
     if (digest !== CREW[user].hash) {
       errEl.hidden = false;
+      if (window.pylonAnalytics && window.pylonAnalytics.trackPortalEvent) {
+        window.pylonAnalytics.trackPortalEvent({
+          username: user,
+          fullName: CREW[user].name,
+          eventAction: 'login_failed',
+          step: 'Login Gate',
+          detail: 'Wrong passcode'
+        });
+      }
       return;
     }
 
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ user }));
     openWorkspaceFor(user, user);
+    logCrewActivity('login_success', 'Signed into Crew Portal');
   });
 
   document.getElementById('adminMemberSwitch').addEventListener('change', (e) => {
     openWorkspaceFor(loggedInUser, e.target.value);
+    logCrewActivity('admin_switch', `Viewing ${e.target.value}`);
   });
 
-  document.getElementById('exportHtmlBtn').addEventListener('click', downloadGeneratedPortfolioHtml);
+  document.getElementById('exportHtmlBtn').addEventListener('click', () => {
+    logCrewActivity('export_html', `Exported ${CREW[activeMemberKey].slug}.html`);
+    downloadGeneratedPortfolioHtml();
+  });
 
   document.getElementById('prevStepBtn').addEventListener('click', () => {
     if (currentStepIdx > 0) {
@@ -2082,6 +2129,7 @@
       syncPreviewTabWithStep();
       renderCurrentStep();
       updateReadinessAndNav();
+      logCrewActivity('step_view', `Navigated back to Step ${STEPS[currentStepIdx].num}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   });
@@ -2097,9 +2145,11 @@
       syncPreviewTabWithStep();
       renderCurrentStep();
       updateReadinessAndNav();
+      logCrewActivity('step_view', `Advanced to Step ${STEPS[currentStepIdx].num}`);
       showToast(`Step 0${currentStepIdx} saved`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      logCrewActivity('profile_completed', 'Clicked final Sync on Step 07');
       showToast('Full profile synced to Pylon Web Team');
     }
   });
@@ -2118,6 +2168,7 @@
 
   document.getElementById('exportJsonBtn').addEventListener('click', () => {
     saveLocalState();
+    logCrewActivity('export_json', `Downloaded ${CREW[activeMemberKey].slug}.json`);
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -2128,6 +2179,7 @@
   });
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
+    logCrewActivity('logout', 'Signed out');
     closeFullscreenModal();
     sessionStorage.removeItem(SESSION_KEY);
     loggedInUser = null;
