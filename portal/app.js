@@ -129,7 +129,33 @@
         secondaryCraft: 'Camera Dept (1st/2nd AC), 16mm/35mm Film, Editorial, Colour',
         contactScopes: 'Cinematography (DP), Gaffer / Lighting, 16mm / Film Shoot, Camera Dept (AC), Commercial Production',
         gear: '',
-        tags: ['Cinematographer (DP)', 'Gaffer / Lighting', 'Camera / AC', 'Editor', 'Post & Colour']
+        tags: ['Cinematographer (DP)', 'Gaffer / Lighting', 'Camera / AC', 'Editor', 'Post & Colour'],
+        sponsors: [
+          {
+            id: 'sp_shape',
+            name: 'SHAPE',
+            relation: 'Brand Ambassador',
+            note: 'Official SHAPE ambassador — click for exclusive gear discount.',
+            url: 'https://www.shapewlb.com/dario',
+            logoUrl: '../assets/images/dario/sponsor-shape.png'
+          },
+          {
+            id: 'sp_smallhd',
+            name: 'SmallHD',
+            relation: 'Brand Ambassador',
+            note: 'Cinema on-camera and production monitoring partner.',
+            url: 'https://smallhd.com/',
+            logoUrl: '../assets/images/dario/sponsor-smallhd.png'
+          },
+          {
+            id: 'sp_oc',
+            name: 'Ontario Camera',
+            relation: 'Sponsored Partner',
+            note: 'Collaborative educational camera and set equipment series.',
+            url: 'https://ontariocamera.com/',
+            logoUrl: '../assets/images/dario/sponsor-ontario-camera.png'
+          }
+        ]
       }
     },
     jess: {
@@ -308,9 +334,9 @@
     {
       id: 'stills',
       num: '05',
-      label: 'Press & Stills',
-      title: 'Festivals, Press & Extra Visual Folders',
-      desc: 'Add festival selections, laurels, grants, or press for your Information tab, plus any Drive folders of standalone stills or lookbooks.'
+      label: 'Sponsors & Press',
+      title: 'Brand Ambassadors, Sponsorships, Press & Stills',
+      desc: 'Add brand sponsorships or ambassador partnerships (with clickable logos & direct website links), festival selections, and extra Drive folders.'
     },
     {
       id: 'links',
@@ -338,6 +364,160 @@
   let previewView = 'home'; // 'home' | 'film' | 'information' | 'contact'
   let previewHoveredIdx = -1;
   let previewFilmIdx = 0;
+
+  /* ------------------------------------------------------------------------
+     INDEXEDDB MEDIA STORE (UNLIMITED UPLOADED STILLS & LOGOS — NO 5MB CAP)
+     ------------------------------------------------------------------------ */
+
+  const MEDIA_DB_NAME = 'pylon_portal_media_v1';
+  const MEDIA_STORE = 'images';
+  const mediaCache = new Map(); // key ("idb://...") -> dataUrl
+  let mediaDbPromise = null;
+
+  function openMediaDb() {
+    if (mediaDbPromise) return mediaDbPromise;
+    mediaDbPromise = new Promise((resolve, reject) => {
+      if (typeof indexedDB === 'undefined') {
+        reject(new Error('IndexedDB unavailable'));
+        return;
+      }
+      const req = indexedDB.open(MEDIA_DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(MEDIA_STORE)) {
+          db.createObjectStore(MEDIA_STORE);
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return mediaDbPromise;
+  }
+
+  async function saveMediaAsset(key, dataUrl) {
+    mediaCache.set(key, dataUrl);
+    try {
+      const db = await openMediaDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(MEDIA_STORE, 'readwrite');
+        tx.objectStore(MEDIA_STORE).put(dataUrl, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (_) {
+      // Keep in-memory cache even if IndexedDB is blocked in private mode
+    }
+    return key;
+  }
+
+  async function deleteMediaAsset(key) {
+    if (!key || !String(key).startsWith('idb://')) return;
+    mediaCache.delete(key);
+    try {
+      const db = await openMediaDb();
+      await new Promise((resolve) => {
+        const tx = db.transaction(MEDIA_STORE, 'readwrite');
+        tx.objectStore(MEDIA_STORE).delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    } catch (_) {}
+  }
+
+  async function hydrateMediaCacheForState(s) {
+    if (!s) return false;
+    const keys = new Set();
+    if (s.heroPosterUrl && String(s.heroPosterUrl).startsWith('idb://')) keys.add(s.heroPosterUrl);
+    (s.projects || []).forEach((p) => {
+      if (p && p.stillPreviewUrl && String(p.stillPreviewUrl).startsWith('idb://')) keys.add(p.stillPreviewUrl);
+    });
+    (s.sponsors || []).forEach((sp) => {
+      if (sp && sp.logoUrl && String(sp.logoUrl).startsWith('idb://')) keys.add(sp.logoUrl);
+    });
+    if (!keys.size) return false;
+    let loadedAny = false;
+    try {
+      const db = await openMediaDb();
+      await Promise.all(
+        Array.from(keys).map(
+          (k) =>
+            new Promise((resolve) => {
+              if (mediaCache.has(k)) return resolve();
+              const tx = db.transaction(MEDIA_STORE, 'readonly');
+              const req = tx.objectStore(MEDIA_STORE).get(k);
+              req.onsuccess = () => {
+                if (req.result) {
+                  mediaCache.set(k, req.result);
+                  loadedAny = true;
+                }
+                resolve();
+              };
+              req.onerror = () => resolve();
+            })
+        )
+      );
+    } catch (_) {}
+    return loadedAny;
+  }
+
+  async function migrateLegacyDataUrls(memberKey, s) {
+    if (!s) return false;
+    let changed = false;
+    if (s.heroPosterUrl && String(s.heroPosterUrl).startsWith('data:image/')) {
+      const key = `idb://${memberKey}/hero_${Date.now()}`;
+      await saveMediaAsset(key, s.heroPosterUrl);
+      s.heroPosterUrl = key;
+      changed = true;
+    }
+    if (Array.isArray(s.projects)) {
+      for (let i = 0; i < s.projects.length; i++) {
+        const p = s.projects[i];
+        if (p && p.stillPreviewUrl && String(p.stillPreviewUrl).startsWith('data:image/')) {
+          const key = `idb://${memberKey}/proj_${p.id || i}_${Date.now()}`;
+          await saveMediaAsset(key, p.stillPreviewUrl);
+          p.stillPreviewUrl = key;
+          changed = true;
+        }
+      }
+    }
+    if (Array.isArray(s.sponsors)) {
+      for (let i = 0; i < s.sponsors.length; i++) {
+        const sp = s.sponsors[i];
+        if (sp && sp.logoUrl && String(sp.logoUrl).startsWith('data:image/')) {
+          const key = `idb://${memberKey}/sponsor_${sp.id || i}_${Date.now()}`;
+          await saveMediaAsset(key, sp.logoUrl);
+          sp.logoUrl = key;
+          changed = true;
+        }
+      }
+    }
+    return changed;
+  }
+
+  function resolveMediaSrc(raw) {
+    const clean = String(raw || '').trim();
+    if (!clean) return '';
+    if (clean.startsWith('idb://')) {
+      return mediaCache.get(clean) || '';
+    }
+    return clean;
+  }
+
+  function isUploadedMediaRef(raw) {
+    const clean = String(raw || '').trim();
+    return clean.startsWith('idb://') || clean.startsWith('data:image/');
+  }
+
+  function createEmptySponsor() {
+    return {
+      id: 'sp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      name: '',
+      relation: 'Brand Ambassador',
+      note: '',
+      url: '',
+      logoUrl: ''
+    };
+  }
 
   /* ------------------------------------------------------------------------
      CRYPTO & STATE HELPERS
@@ -415,6 +595,9 @@
       projects: Array.isArray(d.projects) && d.projects.length
         ? d.projects.map((p) => ({ ...p }))
         : [createEmptyProject()],
+      sponsors: Array.isArray(d.sponsors) && d.sponsors.length
+        ? d.sponsors.map((sp) => ({ ...sp }))
+        : [],
       standaloneGalleryDriveUrl: '',
       btsDriveUrl: '',
       awardsAndPress: d.awardsAndPress || '',
@@ -447,7 +630,10 @@
         ...parsed,
         projects: hasFilledProjects
           ? parsed.projects.map((p) => ({ stillPreviewUrl: '', ...p }))
-          : base.projects
+          : base.projects,
+        sponsors: Array.isArray(parsed.sponsors)
+          ? parsed.sponsors.map((sp) => ({ ...createEmptySponsor(), ...sp }))
+          : base.sponsors
       };
 
       // Backfill live defaults if an older blank draft had empty strings
@@ -463,12 +649,50 @@
     }
   }
 
+  function buildCloudPayload(s) {
+    // Strip heavy base64 data: URLs so Full_Payload_JSON always stays well under Google Sheets' 50,000-char cell limit
+    const stripHeavy = (u) => {
+      const str = String(u || '').trim();
+      if (!str) return '';
+      if (str.startsWith('data:image/')) return '[local-still-uploaded]';
+      return str;
+    };
+    const copy = {
+      ...s,
+      heroPosterUrl: stripHeavy(s.heroPosterUrl),
+      cvExtractedText: String(s.cvExtractedText || '').slice(0, 6000),
+      projects: Array.isArray(s.projects)
+        ? s.projects.map((p) => ({
+            ...p,
+            stillPreviewUrl: stripHeavy(p.stillPreviewUrl)
+          }))
+        : [],
+      sponsors: Array.isArray(s.sponsors)
+        ? s.sponsors.map((sp) => ({
+            ...sp,
+            logoUrl: stripHeavy(sp.logoUrl)
+          }))
+        : []
+    };
+    return copy;
+  }
+
   function saveLocalState() {
     if (!activeMemberKey || !state) return;
     state.updatedAt = new Date().toISOString();
-    localStorage.setItem(STORAGE_PREFIX + activeMemberKey, JSON.stringify(state));
-    const t = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    setStatus(`Saved locally · ${t}`, false);
+    try {
+      localStorage.setItem(STORAGE_PREFIX + activeMemberKey, JSON.stringify(state));
+      const t = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      setStatus(`Saved locally · ${t}`, false);
+    } catch (err) {
+      // Fallback if localStorage is ever full: save without any stray data: blobs
+      try {
+        localStorage.setItem(STORAGE_PREFIX + activeMemberKey, JSON.stringify(buildCloudPayload(state)));
+        setStatus('Saved locally (media in IndexedDB)', false);
+      } catch (_) {
+        setStatus('Storage warning — click Export JSON', false);
+      }
+    }
     updateReadinessAndNav();
     renderLivePreview();
   }
@@ -484,6 +708,7 @@
       setStatus('Syncing to Pylon Sheet...', true);
       const stepsDone = `${countCompletedSteps(state)}/${STEPS.length}`;
       const readiness = computeReadinessPct(state);
+      const cloudPayload = buildCloudPayload(state);
       await fetch(endpoint, {
         method: 'POST',
         mode: 'no-cors',
@@ -494,7 +719,7 @@
           fullName: CREW[activeMemberKey].name,
           stepsCompleted: stepsDone,
           readinessPct: readiness,
-          payload: state
+          payload: cloudPayload
         })
       });
       logCrewActivity('save_draft', `Readiness ${readiness}% · Steps ${stepsDone} · Projects ${(state.projects || []).filter(p => p.title && p.title.trim()).length}`);
@@ -550,7 +775,12 @@
           s.projects.some((p) => p.title && p.title.trim() && p.role && p.role.trim())
         );
       case 'stills':
-        return Boolean(s.standaloneGalleryDriveUrl.trim() || s.btsDriveUrl.trim() || s.awardsAndPress.trim());
+        return Boolean(
+          s.standaloneGalleryDriveUrl.trim() ||
+          s.btsDriveUrl.trim() ||
+          s.awardsAndPress.trim() ||
+          (Array.isArray(s.sponsors) && s.sponsors.some((sp) => sp && sp.name && sp.name.trim()))
+        );
       case 'links':
         return Boolean(
           s.personalSiteUrl.trim() ||
@@ -605,7 +835,7 @@
 
   function stillForProject(p) {
     if (p && p.stillPreviewUrl && p.stillPreviewUrl.trim()) {
-      return p.stillPreviewUrl.trim();
+      return resolveMediaSrc(p.stillPreviewUrl);
     }
     return '';
   }
@@ -688,7 +918,7 @@
     const projs = getPreviewProjects();
     const parsedLoop = parseWatchSource(state.reelUrl || state.heroSourceUrl || '');
     const customMp4 = parsedLoop && parsedLoop.type === 'mp4' ? parsedLoop.url : '';
-    const customPoster = (state.heroPosterUrl && state.heroPosterUrl.trim()) || '';
+    const customPoster = resolveMediaSrc(state.heroPosterUrl || '');
 
     const setStill = (src) => {
       if (src) {
@@ -853,6 +1083,33 @@
         </div>`
       )
       .join('');
+
+    // Sponsors & Brand Ambassadors preview band inside Information tab
+    const csSponsorsEl = document.getElementById('csSponsorsBand');
+    if (csSponsorsEl) {
+      const activeSponsors = (state.sponsors || []).filter((sp) => sp && (sp.name?.trim() || sp.logoUrl?.trim()));
+      if (activeSponsors.length) {
+        csSponsorsEl.hidden = false;
+        csSponsorsEl.innerHTML = `
+          <div class="cs-band-label">Ambassadors &amp; Sponsors</div>
+          <div class="cs-sponsors-grid">
+            ${activeSponsors
+              .map((sp) => {
+                const logoSrc = resolveMediaSrc(sp.logoUrl);
+                return `
+                  <div class="cs-sponsor-tile">
+                    ${logoSrc ? `<img src="${esc(logoSrc)}" alt="${esc(sp.name || 'Brand')}">` : ''}
+                    ${sp.relation ? `<span class="cs-sponsor-rel">${esc(sp.relation)}</span>` : ''}
+                    <span class="cs-sponsor-name">${esc(sp.name || 'Brand Partner')} ${sp.url ? '↗' : ''}</span>
+                  </div>`;
+              })
+              .join('')}
+          </div>`;
+      } else {
+        csSponsorsEl.hidden = true;
+        csSponsorsEl.innerHTML = '';
+      }
+    }
 
     const idxContainer = document.getElementById('csIndexRows');
     idxContainer.innerHTML = projs
@@ -1110,9 +1367,17 @@
           <div class="field">
             <label>Poster / Fallback Still URL <span class="hint-inline">Optional image URL or upload to test</span></label>
             <div class="still-upload-row">
-              <input class="input" data-field="heroPosterUrl" value="${esc(state.heroPosterUrl || '')}" placeholder="https://... or upload image">
+              ${isUploadedMediaRef(state.heroPosterUrl) ? `
+                <div class="still-thumb-pill">
+                  <img class="still-thumb-img" src="${esc(resolveMediaSrc(state.heroPosterUrl))}" alt="">
+                  <span class="still-thumb-label">Uploaded Poster ✓</span>
+                  <button type="button" class="still-clear-btn" id="clearHeroPosterBtn">Clear</button>
+                </div>
+              ` : `
+                <input class="input" data-field="heroPosterUrl" value="${esc(state.heroPosterUrl || '')}" placeholder="https://... or upload image">
+              `}
               <label class="btn btn-sm" style="cursor:pointer; flex-shrink:0;">
-                Test Image
+                ${isUploadedMediaRef(state.heroPosterUrl) ? 'Replace' : 'Upload Image'}
                 <input type="file" id="heroPosterFile" accept="image/*" hidden>
               </label>
             </div>
@@ -1128,17 +1393,36 @@
       `;
       bindFieldInputs(body);
 
+      const clearHeroBtn = document.getElementById('clearHeroPosterBtn');
+      if (clearHeroBtn) {
+        clearHeroBtn.addEventListener('click', () => {
+          deleteMediaAsset(state.heroPosterUrl);
+          state.heroPosterUrl = '';
+          saveLocalState();
+          renderCurrentStep();
+        });
+      }
+
       const posterInp = document.getElementById('heroPosterFile');
       if (posterInp) {
         posterInp.addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
+          e.target.value = '';
           if (!file) return;
-          resizeImageToDataUrl(file, 1280).then((dataUrl) => {
-            state.heroPosterUrl = dataUrl;
-            saveLocalState();
-            renderCurrentStep();
-            showToast('Opening poster preview updated');
-          });
+          resizeImageToDataUrl(file, 1280)
+            .then(async (dataUrl) => {
+              const oldRef = state.heroPosterUrl;
+              const key = `idb://${activeMemberKey}/hero_${Date.now()}`;
+              await saveMediaAsset(key, dataUrl);
+              if (oldRef && oldRef.startsWith('idb://') && oldRef !== key) deleteMediaAsset(oldRef);
+              state.heroPosterUrl = key;
+              saveLocalState();
+              renderCurrentStep();
+              showToast('Opening poster preview updated');
+            })
+            .catch(() => {
+              showToast('Could not read image — try JPG or PNG (HEIC unsupported)');
+            });
         });
       }
     }
@@ -1148,23 +1432,7 @@
     }
 
     else if (st.id === 'stills') {
-      body.innerHTML = `
-        <div class="field">
-          <label>Press, Festival Selections, Awards &amp; Grants <span class="hint-inline">One item per line — populates Column 3 in your Information tab</span></label>
-          <textarea class="textarea" rows="5" data-field="awardsAndPress" placeholder="e.g.&#10;VFF23 Official Selection — Film Title&#10;Forest City Film Festival Special Jury Prize&#10;TIFF Next Wave / Publication Feature">${esc(state.awardsAndPress)}</textarea>
-        </div>
-
-        <div class="field">
-          <label>Additional Stills, Lookbooks, 3D, Apparel or Process Folder <span class="hint-inline">Google Drive link</span></label>
-          <input class="input" data-field="standaloneGalleryDriveUrl" value="${esc(state.standaloneGalleryDriveUrl)}" placeholder="https://drive.google.com/... (high-res stills we can pull for your credit hover backgrounds)">
-        </div>
-
-        <div class="field">
-          <label>Behind-the-Scenes (BTS) Clips / Photos of You on Set <span class="hint-inline">Optional Drive link</span></label>
-          <input class="input" data-field="btsDriveUrl" value="${esc(state.btsDriveUrl)}" placeholder="https://drive.google.com/...">
-        </div>
-      `;
-      bindFieldInputs(body);
+      renderStillsAndSponsorsStep(body);
     }
 
     else if (st.id === 'links') {
@@ -1264,25 +1532,208 @@
      IMAGE THUMB HELPER FOR LIVE STILL PREVIEWING
      ------------------------------------------------------------------------ */
 
-  function resizeImageToDataUrl(file, maxW = 1280) {
+  function resizeImageToDataUrl(file, maxW = 1280, preservePng = false) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const img = new Image();
         img.onload = () => {
-          const scale = Math.min(1, maxW / img.width);
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', 0.78));
+          try {
+            const scale = Math.min(1, maxW / (img.width || 1));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(img.width * scale));
+            canvas.height = Math.max(1, Math.round(img.height * scale));
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const isPng = preservePng && /png|webp|svg/i.test(file.type || file.name || '');
+            resolve(isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.76));
+          } catch (e) {
+            reject(e);
+          }
         };
-        img.onerror = reject;
+        img.onerror = () => reject(new Error('Image decode failed'));
         img.src = reader.result;
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('File read failed'));
       reader.readAsDataURL(file);
+    });
+  }
+
+  function renderStillsAndSponsorsStep(body) {
+    if (!Array.isArray(state.sponsors)) state.sponsors = [];
+    body.innerHTML = `
+      <div class="theme-banner">
+        <strong>Brand Ambassadors &amp; Sponsorships:</strong> Add gear brands, camera houses, or sponsors you work with. Each partner renders in your <strong>Information</strong> tab with its logo and a direct clickable link to the brand's website or discount page.
+      </div>
+
+      <div class="projects-list" id="sponsorsList">
+        ${state.sponsors.length ? state.sponsors.map((sp, idx) => `
+          <div class="project-card" data-sp-idx="${idx}">
+            <div class="project-card-head">
+              <span class="project-index mono">Brand Partner #${String(idx + 1).padStart(2, '0')}</span>
+              <div class="project-actions">
+                ${idx > 0 ? `<button type="button" class="mini-icon-btn" data-sp-up="${idx}" title="Move up">&uarr;</button>` : ''}
+                ${idx < state.sponsors.length - 1 ? `<button type="button" class="mini-icon-btn" data-sp-down="${idx}" title="Move down">&darr;</button>` : ''}
+                <button type="button" class="remove-btn" data-sp-remove="${idx}">Remove</button>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Brand / Partner Name</label>
+                <input class="input" data-spfield="name" data-idx="${idx}" value="${esc(sp.name || '')}" placeholder="e.g. SHAPE, SmallHD, Ontario Camera">
+              </div>
+              <div class="field">
+                <label>Partnership Type</label>
+                <select class="select" data-spfield="relation" data-idx="${idx}">
+                  ${['Brand Ambassador', 'Sponsored Partner', 'Gear Partner', 'Equipment Sponsor', 'Creative Partner'].map((rel) => `
+                    <option value="${esc(rel)}" ${(sp.relation || 'Brand Ambassador') === rel ? 'selected' : ''}>${esc(rel)}</option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Brand Website / Discount Link <span class="hint-inline">Opens directly when logo is clicked</span></label>
+                <input class="input" data-spfield="url" data-idx="${idx}" value="${esc(sp.url || '')}" placeholder="https://www.shapewlb.com/dario">
+              </div>
+              <div class="field">
+                <label>Brand Logo <span class="hint-inline">Logo URL or upload PNG/JPG</span></label>
+                <div class="still-upload-row">
+                  ${isUploadedMediaRef(sp.logoUrl) ? `
+                    <div class="still-thumb-pill">
+                      <img class="still-thumb-img is-logo" src="${esc(resolveMediaSrc(sp.logoUrl))}" alt="">
+                      <span class="still-thumb-label">Logo Uploaded ✓</span>
+                      <button type="button" class="still-clear-btn" data-sp-clearlogo="${idx}">Clear</button>
+                    </div>
+                  ` : `
+                    <input class="input" data-spfield="logoUrl" data-idx="${idx}" value="${esc(sp.logoUrl || '')}" placeholder="Image URL or click Upload Logo">
+                  `}
+                  <label class="btn btn-sm" style="cursor:pointer; flex-shrink:0;">
+                    ${isUploadedMediaRef(sp.logoUrl) ? 'Replace' : 'Upload Logo'}
+                    <input type="file" data-splogofile="${idx}" accept="image/*" hidden>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Short Note / Discount Callout <span class="hint-inline">Optional line shown beneath the brand name</span></label>
+              <input class="input" data-spfield="note" data-idx="${idx}" value="${esc(sp.note || '')}" placeholder="e.g. Official ambassador — click for exclusive gear discount.">
+            </div>
+          </div>
+        `).join('') : `
+          <p class="helper">No sponsors or brand partnerships added yet. Click below to add one (optional).</p>
+        `}
+      </div>
+
+      <div>
+        <button type="button" class="btn btn-paper" id="addSponsorBtn">+ Add Brand Sponsor / Ambassador</button>
+      </div>
+
+      <div class="field" style="margin-top:8px;">
+        <label>Press, Festival Selections, Awards &amp; Grants <span class="hint-inline">One item per line — populates Column 3 in your Information tab</span></label>
+        <textarea class="textarea" rows="5" data-field="awardsAndPress" placeholder="e.g.&#10;VFF23 Official Selection — Film Title&#10;Forest City Film Festival Special Jury Prize&#10;TIFF Next Wave / Publication Feature">${esc(state.awardsAndPress)}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Additional Stills, Lookbooks, 3D, Apparel or Process Folder <span class="hint-inline">Google Drive link</span></label>
+        <input class="input" data-field="standaloneGalleryDriveUrl" value="${esc(state.standaloneGalleryDriveUrl)}" placeholder="https://drive.google.com/... (high-res stills we can pull for your credit hover backgrounds)">
+      </div>
+
+      <div class="field">
+        <label>Behind-the-Scenes (BTS) Clips / Photos of You on Set <span class="hint-inline">Optional Drive link</span></label>
+        <input class="input" data-field="btsDriveUrl" value="${esc(state.btsDriveUrl)}" placeholder="https://drive.google.com/...">
+      </div>
+    `;
+
+    bindFieldInputs(body);
+
+    body.querySelectorAll('[data-spfield]').forEach((el) => {
+      const idx = Number(el.dataset.idx);
+      const key = el.dataset.spfield;
+      const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(evt, () => {
+        state.sponsors[idx][key] = el.value;
+        if (previewView !== 'information') setPreviewView('information');
+        saveLocalState();
+      });
+    });
+
+    body.querySelectorAll('[data-splogofile]').forEach((inp) => {
+      inp.addEventListener('change', (e) => {
+        const idx = Number(inp.dataset.splogofile);
+        const file = e.target.files && e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+        resizeImageToDataUrl(file, 480, true)
+          .then(async (dataUrl) => {
+            const oldRef = state.sponsors[idx].logoUrl;
+            const key = `idb://${activeMemberKey}/sponsor_${state.sponsors[idx].id || idx}_${Date.now()}`;
+            await saveMediaAsset(key, dataUrl);
+            if (oldRef && oldRef.startsWith('idb://') && oldRef !== key) deleteMediaAsset(oldRef);
+            state.sponsors[idx].logoUrl = key;
+            if (previewView !== 'information') setPreviewView('information');
+            saveLocalState();
+            renderStillsAndSponsorsStep(body);
+            showToast('Brand logo updated');
+          })
+          .catch(() => {
+            showToast('Could not read logo — try PNG or JPG');
+          });
+      });
+    });
+
+    body.querySelectorAll('[data-sp-clearlogo]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.spClearlogo);
+        deleteMediaAsset(state.sponsors[idx].logoUrl);
+        state.sponsors[idx].logoUrl = '';
+        saveLocalState();
+        renderStillsAndSponsorsStep(body);
+      });
+    });
+
+    body.querySelectorAll('[data-sp-up]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.spUp);
+        if (idx <= 0) return;
+        const tmp = state.sponsors[idx - 1];
+        state.sponsors[idx - 1] = state.sponsors[idx];
+        state.sponsors[idx] = tmp;
+        saveLocalState();
+        renderStillsAndSponsorsStep(body);
+      });
+    });
+
+    body.querySelectorAll('[data-sp-down]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.spDown);
+        if (idx >= state.sponsors.length - 1) return;
+        const tmp = state.sponsors[idx + 1];
+        state.sponsors[idx + 1] = state.sponsors[idx];
+        state.sponsors[idx] = tmp;
+        saveLocalState();
+        renderStillsAndSponsorsStep(body);
+      });
+    });
+
+    body.querySelectorAll('[data-sp-remove]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.spRemove);
+        deleteMediaAsset(state.sponsors[idx]?.logoUrl);
+        state.sponsors.splice(idx, 1);
+        saveLocalState();
+        renderStillsAndSponsorsStep(body);
+      });
+    });
+
+    document.getElementById('addSponsorBtn').addEventListener('click', () => {
+      state.sponsors.push(createEmptySponsor());
+      if (previewView !== 'information') setPreviewView('information');
+      saveLocalState();
+      renderStillsAndSponsorsStep(body);
     });
   }
 
@@ -1562,11 +2013,19 @@
                 <input class="input" data-pfield="watchUrl" data-idx="${idx}" value="${esc(p.watchUrl)}" placeholder="https://youtube.com/watch?v=... or Vimeo / Drive">
               </div>
               <div class="field">
-                <label>Hover Background Still <span class="hint-inline">Paste image URL or upload to preview</span></label>
+                <label>Hover Background Still <span class="hint-inline">Paste image URL or upload (unlimited stills)</span></label>
                 <div class="still-upload-row">
-                  <input class="input" data-pfield="stillPreviewUrl" data-idx="${idx}" value="${esc(p.stillPreviewUrl || '')}" placeholder="Image URL or click Upload Still">
+                  ${isUploadedMediaRef(p.stillPreviewUrl) ? `
+                    <div class="still-thumb-pill">
+                      <img class="still-thumb-img" src="${esc(resolveMediaSrc(p.stillPreviewUrl))}" alt="">
+                      <span class="still-thumb-label">Still Uploaded ✓</span>
+                      <button type="button" class="still-clear-btn" data-clearstill="${idx}">Clear</button>
+                    </div>
+                  ` : `
+                    <input class="input" data-pfield="stillPreviewUrl" data-idx="${idx}" value="${esc(p.stillPreviewUrl || '')}" placeholder="Image URL or click Upload Still">
+                  `}
                   <label class="btn btn-sm" style="cursor:pointer; flex-shrink:0;">
-                    Upload Still
+                    ${isUploadedMediaRef(p.stillPreviewUrl) ? 'Replace' : 'Upload Still'}
                     <input type="file" data-stillfile="${idx}" accept="image/*" hidden>
                   </label>
                 </div>
@@ -1607,14 +2066,33 @@
       inp.addEventListener('change', (e) => {
         const idx = Number(inp.dataset.stillfile);
         const file = e.target.files && e.target.files[0];
+        e.target.value = '';
         if (!file) return;
-        resizeImageToDataUrl(file, 1280).then((dataUrl) => {
-          state.projects[idx].stillPreviewUrl = dataUrl;
-          previewHoveredIdx = idx;
-          saveLocalState();
-          renderProjectsStep(body);
-          showToast(`Row #${String(idx + 1).padStart(2, '0')} hover still updated`);
-        });
+        resizeImageToDataUrl(file, 1280)
+          .then(async (dataUrl) => {
+            const oldRef = state.projects[idx].stillPreviewUrl;
+            const key = `idb://${activeMemberKey}/proj_${state.projects[idx].id || idx}_${Date.now()}`;
+            await saveMediaAsset(key, dataUrl);
+            if (oldRef && oldRef.startsWith('idb://') && oldRef !== key) deleteMediaAsset(oldRef);
+            state.projects[idx].stillPreviewUrl = key;
+            previewHoveredIdx = idx;
+            saveLocalState();
+            renderProjectsStep(body);
+            showToast(`Row #${String(idx + 1).padStart(2, '0')} hover still updated`);
+          })
+          .catch(() => {
+            showToast('Could not read image — try JPG or PNG (HEIC unsupported)');
+          });
+      });
+    });
+
+    body.querySelectorAll('[data-clearstill]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.clearstill);
+        deleteMediaAsset(state.projects[idx]?.stillPreviewUrl);
+        state.projects[idx].stillPreviewUrl = '';
+        saveLocalState();
+        renderProjectsStep(body);
       });
     });
 
@@ -1760,7 +2238,7 @@
           roles: p.role.trim() || state.headline,
           year: p.year.trim() || '2026',
           // Only a still the member chose themselves — never a stock fallback
-          still: p.stillPreviewUrl && p.stillPreviewUrl.trim() && !p.stillPreviewUrl.startsWith('data:')
+          still: p.stillPreviewUrl && p.stillPreviewUrl.trim() && !isUploadedMediaRef(p.stillPreviewUrl)
             ? p.stillPreviewUrl.trim()
             : undefined,
           focus: 0.45,
@@ -1784,7 +2262,7 @@
       landing: {
         // Only the member's own reel / poster — no studio reel stand-in
         previewMp4: parsedHero && parsedHero.type === 'mp4' ? parsedHero.url : undefined,
-        still: state.heroPosterUrl && state.heroPosterUrl.trim() && !state.heroPosterUrl.startsWith('data:')
+        still: state.heroPosterUrl && state.heroPosterUrl.trim() && !isUploadedMediaRef(state.heroPosterUrl)
           ? state.heroPosterUrl.trim()
           : undefined,
         focus: 0.4,
@@ -1800,6 +2278,15 @@
           { heading: 'Elsewhere', items: elsewhere }
         ]
       },
+      sponsors: (state.sponsors || [])
+        .filter((sp) => sp && (sp.name?.trim() || sp.logoUrl?.trim()))
+        .map((sp) => ({
+          name: (sp.name || '').trim(),
+          relation: (sp.relation || '').trim(),
+          note: (sp.note || '').trim(),
+          url: (sp.url || '').trim(),
+          logoUrl: sp.logoUrl && sp.logoUrl.trim() && !isUploadedMediaRef(sp.logoUrl) ? sp.logoUrl.trim() : ''
+        })),
       projects: compiledProjects
     };
 
@@ -2060,7 +2547,19 @@
     updateReadinessAndNav();
     renderLivePreview();
     setStatus('Ready · Auto-saving', false);
-    tryFetchCloudDraft(activeMemberKey);
+
+    // Hydrate IndexedDB stills/logos and seamlessly migrate any legacy base64 stills out of localStorage
+    (async () => {
+      const targetKey = activeMemberKey;
+      const migrated = await migrateLegacyDataUrls(targetKey, state);
+      const hydrated = await hydrateMediaCacheForState(state);
+      if (activeMemberKey === targetKey && (migrated || hydrated)) {
+        if (migrated) saveLocalState();
+        renderCurrentStep();
+        renderLivePreview();
+      }
+      tryFetchCloudDraft(targetKey);
+    })();
   }
 
   document.getElementById('pwToggle').addEventListener('click', () => {

@@ -693,6 +693,95 @@ html, body {
 }
 .still-upload-row .input { flex: 1; }
 
+.still-thumb-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 5px 10px;
+  background: var(--ink);
+  border: 1px solid rgba(47, 191, 113, 0.45);
+}
+.still-thumb-img {
+  width: 46px;
+  height: 28px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #000;
+  flex-shrink: 0;
+}
+.still-thumb-img.is-logo {
+  object-fit: contain;
+  padding: 2px;
+}
+.still-thumb-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: var(--green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.still-clear-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.still-clear-btn:hover {
+  color: #ff6b57;
+  border-color: #ff6b57;
+}
+
+/* Sponsorships & Brand Ambassadors in Portal Live Preview */
+.cs-sponsors-band {
+  margin-top: calc(10px * var(--cs-scale, 1));
+  padding-top: calc(8px * var(--cs-scale, 1));
+  border-top: 1px solid rgba(244, 243, 239, 0.16);
+}
+.cs-sponsors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(6px * var(--cs-scale, 1));
+  margin-top: calc(5px * var(--cs-scale, 1));
+}
+.cs-sponsor-tile {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--cs-scale, 1));
+  padding: calc(6px * var(--cs-scale, 1));
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(244, 243, 239, 0.16);
+  text-decoration: none;
+  color: var(--paper);
+}
+.cs-sponsor-tile img {
+  height: calc(18px * var(--cs-scale, 1));
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+.cs-sponsor-rel {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: calc(5.5px * var(--cs-scale, 1));
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cs-sponsor-name {
+  font-size: calc(7px * var(--cs-scale, 1));
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 /* Step Footer Bar */
 .step-footer {
   margin-top: 36px;

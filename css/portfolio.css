@@ -874,6 +874,98 @@ body.is-opening .mast-name__clip {
   text-decoration-color: var(--orange);
 }
 
+/* Sponsorships & Brand Ambassadors Band */
+.band--sponsors {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.sponsors-grid {
+  grid-column: 4 / span 9;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.sponsor-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  transition: border-color 0.22s ease, background-color 0.22s ease, transform 0.22s var(--ease-out);
+}
+
+.sponsor-card:hover {
+  border-color: var(--orange);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.sponsor-card__logo-wrap {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(244, 243, 239, 0.08);
+  padding: 10px 14px;
+}
+
+.sponsor-card__logo {
+  max-width: 100%;
+  max-height: 44px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.sponsor-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sponsor-card__rel {
+  font-family: var(--font-mono);
+  font-size: calc(var(--cap) * 0.88);
+  color: var(--orange);
+  letter-spacing: 0.08em;
+}
+
+.sponsor-card__name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--paper);
+  font-size: calc(var(--cap) * 1.15);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.sponsor-card__arrow {
+  color: var(--dim);
+  transition: color 0.2s ease, transform 0.2s var(--ease-out);
+}
+
+.sponsor-card:hover .sponsor-card__arrow {
+  color: var(--orange);
+  transform: translate(2px, -2px);
+}
+
+.sponsor-card__note {
+  color: var(--dim);
+  text-transform: none;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
 /* Full Clickable Credits Index Table */
 .band--index .band__label {
   grid-column: 1 / -1;
@@ -1332,6 +1424,16 @@ body.is-opening .mast-name__clip {
 
   .facts {
     grid-column: span 6;
+  }
+
+  .sponsors-grid {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sponsor-card {
+    padding: 16px;
   }
 
   .index-list a {

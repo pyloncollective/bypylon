@@ -132,6 +132,49 @@
     }
   }
 
+  // Render Brand Ambassadors & Sponsorships Band inside Information overlay (if configured)
+  if (Array.isArray(DATA.sponsors) && DATA.sponsors.length > 0 && $('#factsGrid')) {
+    const validSponsors = DATA.sponsors.filter((s) => s && (s.name || s.logoUrl));
+    if (validSponsors.length > 0) {
+      let sponsorsBand = $('#sponsorsBand');
+      if (!sponsorsBand) {
+        sponsorsBand = document.createElement('div');
+        sponsorsBand.id = 'sponsorsBand';
+        sponsorsBand.className = 'band band--sponsors';
+        $('#factsGrid').insertAdjacentElement('afterend', sponsorsBand);
+      }
+      sponsorsBand.innerHTML = `
+        <h2 class="band__label">Ambassadors &amp; Sponsors</h2>
+        <div class="sponsors-grid">
+          ${validSponsors
+            .map((sp) => {
+              const href = (sp.url || '').trim();
+              const tagOpen = href
+                ? `<a class="sponsor-card" href="${esc(href)}" target="_blank" rel="noopener">`
+                : `<div class="sponsor-card">`;
+              const tagClose = href ? '</a>' : '</div>';
+              return `
+                ${tagOpen}
+                  ${
+                    sp.logoUrl
+                      ? `<div class="sponsor-card__logo-wrap"><img class="sponsor-card__logo" src="${esc(sp.logoUrl)}" alt="${esc(sp.name || 'Brand Partner')} logo" loading="lazy"></div>`
+                      : ''
+                  }
+                  <div class="sponsor-card__meta">
+                    ${sp.relation ? `<span class="sponsor-card__rel">${esc(sp.relation)}</span>` : ''}
+                    <span class="sponsor-card__name">
+                      <span>${esc(sp.name || 'Brand Partner')}</span>
+                      ${href ? '<span class="sponsor-card__arrow" aria-hidden="true">&#8599;</span>' : ''}
+                    </span>
+                    ${sp.note ? `<p class="sponsor-card__note">${esc(sp.note)}</p>` : ''}
+                  </div>
+                ${tagClose}`;
+            })
+            .join('')}
+        </div>`;
+    }
+  }
+
   // Populate Contact Metadata & Scope Pills
   if ($('#contactArtistHeading') && DATA.name) {
     $('#contactArtistHeading').textContent = `Work with ${DATA.name.split(' ')[0]}`;
