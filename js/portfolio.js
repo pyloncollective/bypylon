@@ -112,13 +112,19 @@
       $('#bioBody').innerHTML = DATA.info.paragraphs.map((p) => `<p>${p}</p>`).join('');
     }
     if ($('#factsGrid') && Array.isArray(DATA.info.facts)) {
-      $('#factsGrid').innerHTML = DATA.info.facts
-        .map(
-          (col) => `
-          <div class="facts">
+      const visibleFacts = DATA.info.facts.filter((col) => col && !col.hidden);
+      const count = visibleFacts.length;
+      const hasWide = visibleFacts.some((c) => c.wide);
+      const defaultSpan = count === 1 ? 12 : count === 2 ? 6 : count === 3 ? (hasWide ? 3 : 4) : 3;
+      $('#factsGrid').innerHTML = visibleFacts
+        .map((col) => {
+          const span = col.span || (col.wide ? 6 : defaultSpan);
+          const wideCls = span >= 6 ? ' facts--wide' : '';
+          return `
+          <div class="facts${wideCls}" style="--facts-span: ${span}">
             <h2>${esc(col.heading)}</h2>
             <ul>
-              ${col.items
+              ${(col.items || [])
                 .map((it) =>
                   it.href
                     ? `<li><a href="${esc(it.href)}" ${it.external ? 'target="_blank" rel="noopener"' : ''}>${esc(it.label)}</a></li>`
@@ -126,8 +132,8 @@
                 )
                 .join('')}
             </ul>
-          </div>`
-        )
+          </div>`;
+        })
         .join('');
     }
   }
@@ -148,7 +154,8 @@
         <div class="sponsors-grid">
           ${validSponsors
             .map((sp) => {
-              const href = (sp.url || '').trim();
+              const rawUrl = (sp.url || '').trim();
+              const href = rawUrl ? (/^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`) : '';
               const tagOpen = href
                 ? `<a class="sponsor-card" href="${esc(href)}" target="_blank" rel="noopener">`
                 : `<div class="sponsor-card">`;
@@ -281,6 +288,33 @@
       });
 
       el.appendChild(vid);
+    } else if ((item.previewYoutube || item.previewVimeo) && !reduce) {
+      const wrap = document.createElement('div');
+      wrap.className = 'plate__embed';
+      const iframe = document.createElement('iframe');
+      if (item.previewYoutube) {
+        const id = encodeURIComponent(item.previewYoutube);
+        iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1`;
+      } else {
+        const id = encodeURIComponent(item.previewVimeo);
+        iframe.src = `https://player.vimeo.com/video/${id}?background=1&autoplay=1&muted=1&loop=1&dnt=1`;
+      }
+      iframe.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.setAttribute('tabindex', '-1');
+      iframe.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(iframe);
+      el.appendChild(wrap);
+      readyPromise = new Promise((resolve) => {
+        iframe.addEventListener('load', () => {
+          el.classList.add('is-playing');
+          resolve();
+        }, { once: true });
+        setTimeout(() => {
+          el.classList.add('is-playing');
+          resolve();
+        }, 1400);
+      });
     }
 
     platesEl.appendChild(el);

@@ -130,6 +130,7 @@
         contactScopes: 'Cinematography (DP), Gaffer / Lighting, 16mm / Film Shoot, Camera Dept (AC), Commercial Production',
         gear: '',
         tags: ['Cinematographer (DP)', 'Gaffer / Lighting', 'Camera / AC', 'Editor', 'Post & Colour'],
+        enabledInfoCols: { primary: true, secondary: false, press: true, elsewhere: true, sponsors: true },
         sponsors: [
           {
             id: 'sp_shape',
@@ -580,6 +581,14 @@
       tags: Array.isArray(d.tags) ? [...d.tags] : [],
       primaryCraft: d.primaryCraft || '',
       secondaryCraft: d.secondaryCraft || '',
+      enabledInfoCols: {
+        primary: true,
+        secondary: true,
+        press: true,
+        elsewhere: true,
+        sponsors: true,
+        ...(d.enabledInfoCols || {})
+      },
       contactScopes: d.contactScopes || d.primaryCraft || '',
       gear: d.gear || '',
       unionAndCerts: '',
@@ -628,6 +637,10 @@
       const merged = {
         ...base,
         ...parsed,
+        enabledInfoCols: {
+          ...base.enabledInfoCols,
+          ...(parsed.enabledInfoCols || {})
+        },
         projects: hasFilledProjects
           ? parsed.projects.map((p) => ({ stillPreviewUrl: '', ...p }))
           : base.projects,
@@ -913,11 +926,15 @@
   function updatePreviewScreenMedia() {
     const vid = document.getElementById('csVideo');
     const still = document.getElementById('csStill');
+    const embed = document.getElementById('csEmbedLoop');
     if (!vid || !still || !state) return;
 
     const projs = getPreviewProjects();
     const parsedLoop = parseWatchSource(state.reelUrl || state.heroSourceUrl || '');
     const customMp4 = parsedLoop && parsedLoop.type === 'mp4' ? parsedLoop.url : '';
+    const embedLoopKey = parsedLoop && (parsedLoop.type === 'youtube' || parsedLoop.type === 'vimeo')
+      ? `${parsedLoop.type}:${parsedLoop.id}`
+      : '';
     const customPoster = resolveMediaSrc(state.heroPosterUrl || '');
 
     const setStill = (src) => {
@@ -930,30 +947,69 @@
       }
     };
 
+    const hideEmbed = () => {
+      if (embed) embed.classList.add('is-hidden');
+    };
+
     if (previewView === 'home' && previewHoveredIdx >= 0 && projs[previewHoveredIdx]) {
       setStill(stillForProject(projs[previewHoveredIdx]));
       vid.classList.add('is-hidden');
+      hideEmbed();
     } else {
       setStill(customPoster);
-      if (!customMp4) {
+      if (customMp4) {
+        if (embed) {
+          embed.classList.add('is-hidden');
+          if (embed.dataset.loopKey) {
+            embed.innerHTML = '';
+            embed.dataset.loopKey = '';
+          }
+        }
+        if (vid.getAttribute('src') !== customMp4) {
+          vid.setAttribute('src', customMp4);
+          vid.load();
+        }
+        if (previewView === 'film') {
+          vid.pause();
+          vid.classList.add('is-hidden');
+        } else {
+          vid.classList.remove('is-hidden');
+          vid.play().catch(() => {});
+        }
+      } else if (embedLoopKey && embed) {
         if (vid.getAttribute('src')) {
           vid.pause();
           vid.removeAttribute('src');
           vid.load();
         }
         vid.classList.add('is-hidden');
-        return;
-      }
-      if (vid.getAttribute('src') !== customMp4) {
-        vid.setAttribute('src', customMp4);
-        vid.load();
-      }
-      if (previewView === 'film') {
-        vid.pause();
-        vid.classList.add('is-hidden');
+        if (previewView === 'film') {
+          embed.classList.add('is-hidden');
+        } else {
+          if (embed.dataset.loopKey !== embedLoopKey) {
+            embed.dataset.loopKey = embedLoopKey;
+            const id = encodeURIComponent(parsedLoop.id);
+            const src = parsedLoop.type === 'youtube'
+              ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${id}&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1`
+              : `https://player.vimeo.com/video/${id}?background=1&autoplay=1&muted=1&loop=1&dnt=1`;
+            embed.innerHTML = `<iframe src="${src}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1" aria-hidden="true"></iframe>`;
+          }
+          embed.classList.remove('is-hidden');
+        }
       } else {
-        vid.classList.remove('is-hidden');
-        vid.play().catch(() => {});
+        if (vid.getAttribute('src')) {
+          vid.pause();
+          vid.removeAttribute('src');
+          vid.load();
+        }
+        vid.classList.add('is-hidden');
+        if (embed) {
+          embed.classList.add('is-hidden');
+          if (embed.dataset.loopKey) {
+            embed.innerHTML = '';
+            embed.dataset.loopKey = '';
+          }
+        }
       }
     }
   }
@@ -1069,25 +1125,39 @@
     if (state.videoChannelUrl.trim()) elsewhereItems.push('Vimeo / YouTube ↗');
     if (state.imdbOrLetterboxdUrl.trim()) elsewhereItems.push('IMDb ↗');
 
-    document.getElementById('csFactsGrid').innerHTML = [
-      { h: 'Primary Craft', list: primaryItems.length ? primaryItems : ['—'] },
-      { h: 'Additional Lanes', list: secondaryItems.length ? secondaryItems : ['—'] },
-      { h: 'Press & Selections', list: pressItems.length ? pressItems : ['Add in Step 05'] },
-      { h: 'Elsewhere', list: elsewhereItems }
-    ]
-      .map(
-        (col) => `
-        <div class="cs-facts-col">
-          <h5>${esc(col.h)}</h5>
-          <div>${col.list.slice(0, 5).map((x) => esc(x)).join('<br>')}</div>
-        </div>`
-      )
-      .join('');
+    const colsCfg = { primary: true, secondary: true, press: true, elsewhere: true, sponsors: true, ...(state.enabledInfoCols || {}) };
+    const factCols = [];
+    if (colsCfg.primary) factCols.push({ h: 'Primary Craft', list: primaryItems.length ? primaryItems : ['—'], wide: false });
+    if (colsCfg.secondary) factCols.push({ h: 'Additional Lanes', list: secondaryItems.length ? secondaryItems : ['—'], wide: false });
+    if (colsCfg.press) factCols.push({ h: 'Press & Selections', list: pressItems.length ? pressItems : ['Add in Step 05'], wide: !colsCfg.secondary });
+    if (colsCfg.elsewhere) factCols.push({ h: 'Elsewhere', list: elsewhereItems, wide: false });
+
+    const csFactsEl = document.getElementById('csFactsGrid');
+    if (csFactsEl) {
+      if (!factCols.length) {
+        csFactsEl.hidden = true;
+        csFactsEl.innerHTML = '';
+      } else {
+        csFactsEl.hidden = false;
+        csFactsEl.style.gridTemplateColumns = factCols.map((c) => (c.wide ? '2fr' : '1fr')).join(' ');
+        csFactsEl.innerHTML = factCols
+          .map(
+            (col) => `
+            <div class="cs-facts-col">
+              <h5>${esc(col.h)}</h5>
+              <div>${(col.wide ? col.list : col.list.slice(0, 6)).map((x) => esc(x)).join('<br>')}</div>
+            </div>`
+          )
+          .join('');
+      }
+    }
 
     // Sponsors & Brand Ambassadors preview band inside Information tab
     const csSponsorsEl = document.getElementById('csSponsorsBand');
     if (csSponsorsEl) {
-      const activeSponsors = (state.sponsors || []).filter((sp) => sp && (sp.name?.trim() || sp.logoUrl?.trim()));
+      const activeSponsors = colsCfg.sponsors
+        ? (state.sponsors || []).filter((sp) => sp && (sp.name?.trim() || sp.logoUrl?.trim()))
+        : [];
       if (activeSponsors.length) {
         csSponsorsEl.hidden = false;
         csSponsorsEl.innerHTML = `
@@ -1096,12 +1166,18 @@
             ${activeSponsors
               .map((sp) => {
                 const logoSrc = resolveMediaSrc(sp.logoUrl);
+                const rawUrl = (sp.url || '').trim();
+                const href = rawUrl ? (/^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`) : '';
+                const openTag = href
+                  ? `<a class="cs-sponsor-tile" href="${esc(href)}" target="_blank" rel="noopener">`
+                  : `<div class="cs-sponsor-tile">`;
+                const closeTag = href ? '</a>' : '</div>';
                 return `
-                  <div class="cs-sponsor-tile">
+                  ${openTag}
                     ${logoSrc ? `<img src="${esc(logoSrc)}" alt="${esc(sp.name || 'Brand')}">` : ''}
                     ${sp.relation ? `<span class="cs-sponsor-rel">${esc(sp.relation)}</span>` : ''}
-                    <span class="cs-sponsor-name">${esc(sp.name || 'Brand Partner')} ${sp.url ? '↗' : ''}</span>
-                  </div>`;
+                    <span class="cs-sponsor-name">${esc(sp.name || 'Brand Partner')} ${href ? '↗' : ''}</span>
+                  ${closeTag}`;
               })
               .join('')}
           </div>`;
@@ -1300,6 +1376,7 @@
     }
 
     else if (st.id === 'craft') {
+      const colsCfg = { primary: true, secondary: true, press: true, elsewhere: true, sponsors: true, ...(state.enabledInfoCols || {}) };
       body.innerHTML = `
         <div class="field">
           <label>Homepage Roster Filter Tags <span class="hint-inline">Which filter buttons on pylonpictures.com/#roster highlight your row</span></label>
@@ -1311,14 +1388,34 @@
         </div>
 
         <div class="field">
+          <label>Information Tab Headers <span class="hint-inline">Toggle which headers appear on your page (turning off Additional Lanes widens Press &amp; Selections)</span></label>
+          <div class="header-toggle-grid" id="infoColToggles">
+            ${[
+              { key: 'primary', label: 'Primary Craft' },
+              { key: 'secondary', label: 'Additional Lanes' },
+              { key: 'press', label: 'Press & Selections' },
+              { key: 'elsewhere', label: 'Elsewhere' },
+              { key: 'sponsors', label: 'Ambassadors & Sponsors' }
+            ].map((item) => `
+              <label class="header-toggle ${colsCfg[item.key] ? 'is-on' : ''}">
+                <input type="checkbox" data-coltoggle="${item.key}" ${colsCfg[item.key] ? 'checked' : ''}>
+                <span>${item.label}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="field">
           <label>Primary Craft Column <span class="hint-inline">Column 1 inside your Information tab (comma-separated)</span></label>
           <input class="input" data-field="primaryCraft" value="${esc(state.primaryCraft)}" placeholder="e.g. Commercial Direction, Music Videos, Screenwriting, 35mm Photography">
         </div>
 
+        ${colsCfg.secondary ? `
         <div class="field">
           <label>Additional Lanes Column <span class="hint-inline">Column 2 inside your Information tab (comma-separated)</span></label>
           <input class="input" data-field="secondaryCraft" value="${esc(state.secondaryCraft)}" placeholder="e.g. Editorial, Location Scouting, Camera Dept (AC)">
         </div>
+        ` : ''}
 
         <div class="field">
           <label>Contact Form Discipline Pills <span class="hint-inline">Clickable scope tags visitors pick on your Contact form (comma-separated)</span></label>
@@ -1332,6 +1429,15 @@
         </div>
       `;
       bindFieldInputs(body);
+      body.querySelectorAll('[data-coltoggle]').forEach((chk) => {
+        chk.addEventListener('change', () => {
+          state.enabledInfoCols = { primary: true, secondary: true, press: true, elsewhere: true, sponsors: true, ...(state.enabledInfoCols || {}) };
+          state.enabledInfoCols[chk.dataset.coltoggle] = chk.checked;
+          if (previewView !== 'information') setPreviewView('information');
+          saveLocalState();
+          renderCurrentStep();
+        });
+      });
       body.querySelectorAll('[data-tag]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const t = btn.dataset.tag;
@@ -2251,6 +2357,13 @@
       });
 
     const parsedHero = parseWatchSource(state.reelUrl || '');
+    const colsCfg = { primary: true, secondary: true, press: true, elsewhere: true, sponsors: true, ...(state.enabledInfoCols || {}) };
+    const compiledFacts = [];
+    if (colsCfg.primary) compiledFacts.push({ heading: 'Primary Craft', items: splitItems(state.primaryCraft).map((label) => ({ label })) });
+    if (colsCfg.secondary) compiledFacts.push({ heading: 'Additional Lanes', items: splitItems(state.secondaryCraft).map((label) => ({ label })) });
+    if (colsCfg.press) compiledFacts.push({ heading: 'Press & Selections', wide: !colsCfg.secondary, span: !colsCfg.secondary ? 6 : 3, items: pressLines.length ? pressLines : [{ label: 'Pylon Pictures Ensemble' }] });
+    if (colsCfg.elsewhere) compiledFacts.push({ heading: 'Elsewhere', items: elsewhere });
+
     const configObj = {
       slug: m.slug,
       name: state.displayName.trim() || m.name,
@@ -2262,6 +2375,8 @@
       landing: {
         // Only the member's own reel / poster — no studio reel stand-in
         previewMp4: parsedHero && parsedHero.type === 'mp4' ? parsedHero.url : undefined,
+        previewYoutube: parsedHero && parsedHero.type === 'youtube' ? parsedHero.id : undefined,
+        previewVimeo: parsedHero && parsedHero.type === 'vimeo' ? parsedHero.id : undefined,
         still: state.heroPosterUrl && state.heroPosterUrl.trim() && !isUploadedMediaRef(state.heroPosterUrl)
           ? state.heroPosterUrl.trim()
           : undefined,
@@ -2271,22 +2386,22 @@
       info: {
         subtitle: state.infoSubtitle?.trim() || `${state.headline} · Pylon Pictures`,
         paragraphs,
-        facts: [
-          { heading: 'Primary Craft', items: splitItems(state.primaryCraft).map((label) => ({ label })) },
-          { heading: 'Additional Lanes', items: splitItems(state.secondaryCraft).map((label) => ({ label })) },
-          { heading: 'Press & Selections', items: pressLines.length ? pressLines : [{ label: 'Pylon Pictures Ensemble' }] },
-          { heading: 'Elsewhere', items: elsewhere }
-        ]
+        facts: compiledFacts
       },
-      sponsors: (state.sponsors || [])
-        .filter((sp) => sp && (sp.name?.trim() || sp.logoUrl?.trim()))
-        .map((sp) => ({
-          name: (sp.name || '').trim(),
-          relation: (sp.relation || '').trim(),
-          note: (sp.note || '').trim(),
-          url: (sp.url || '').trim(),
-          logoUrl: sp.logoUrl && sp.logoUrl.trim() && !isUploadedMediaRef(sp.logoUrl) ? sp.logoUrl.trim() : ''
-        })),
+      sponsors: colsCfg.sponsors
+        ? (state.sponsors || [])
+            .filter((sp) => sp && (sp.name?.trim() || sp.logoUrl?.trim()))
+            .map((sp) => {
+              const rawUrl = (sp.url || '').trim();
+              return {
+                name: (sp.name || '').trim(),
+                relation: (sp.relation || '').trim(),
+                note: (sp.note || '').trim(),
+                url: rawUrl ? (/^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`) : '',
+                logoUrl: sp.logoUrl && sp.logoUrl.trim() && !isUploadedMediaRef(sp.logoUrl) ? sp.logoUrl.trim() : ''
+              };
+            })
+        : [],
       projects: compiledProjects
     };
 

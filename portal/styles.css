@@ -761,6 +761,13 @@ html, body {
   border: 1px solid rgba(244, 243, 239, 0.16);
   text-decoration: none;
   color: var(--paper);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.cs-sponsor-tile:hover {
+  border-color: var(--orange);
+  background: rgba(255, 77, 0, 0.1);
 }
 .cs-sponsor-tile img {
   height: calc(18px * var(--cs-scale, 1));
@@ -940,6 +947,62 @@ html, body {
 
 .cs-video { opacity: 1; }
 .cs-video.is-hidden { opacity: 0; pointer-events: none; }
+
+.cs-embed-loop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+.cs-embed-loop.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+.cs-embed-loop iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 118%;
+  height: 118%;
+  min-width: 177.78%;
+  min-height: 118%;
+  transform: translate(-50%, -50%);
+  border: 0;
+  pointer-events: none;
+}
+
+.header-toggle-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.header-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
+}
+.header-toggle.is-on {
+  border-color: var(--orange);
+  background: var(--orange-soft);
+  color: var(--white);
+}
+.header-toggle input {
+  accent-color: var(--orange);
+  cursor: pointer;
+}
 
 .cs-veil {
   position: absolute;
