@@ -73,6 +73,27 @@
   if ($('#artistRoleTitle') && DATA.roleLine) $('#artistRoleTitle').textContent = DATA.roleLine;
   if ($('#artistRoleLoc') && DATA.location) $('#artistRoleLoc').textContent = DATA.location;
 
+  // Auto-fit guard for long display names so col 1-7 never collides with .mast-role (col 8-10)
+  const mastNameEl = $('.mast-name');
+  const mastWordEl = $('#artistNameWord');
+  const fitMastName = () => {
+    if (!mastNameEl || !mastWordEl) return;
+    mastNameEl.style.removeProperty('--name-fit');
+    if (window.matchMedia('(max-width: 760px)').matches) return;
+    const avail = mastNameEl.clientWidth;
+    const need = mastWordEl.scrollWidth;
+    if (avail > 0 && need > avail) {
+      mastNameEl.style.setProperty('--name-fit', ((avail / need) * 0.96).toFixed(4));
+    }
+  };
+  let fitMastRaf = 0;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(fitMastRaf);
+    fitMastRaf = requestAnimationFrame(fitMastName);
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitMastName);
+  fitMastName();
+
   // Render Bottom-Left Programme List
   listEl.innerHTML = projects
     .map(
@@ -164,7 +185,7 @@
                 ${tagOpen}
                   ${
                     sp.logoUrl
-                      ? `<div class="sponsor-card__logo-wrap"><img class="sponsor-card__logo" src="${esc(sp.logoUrl)}" alt="${esc(sp.name || 'Brand Partner')} logo" loading="lazy"></div>`
+                      ? `<div class="sponsor-card__logo-wrap"><img class="sponsor-card__logo" src="${esc(sp.logoUrl)}" alt="${esc(sp.name || 'Brand Partner')} logo"></div>`
                       : ''
                   }
                   <div class="sponsor-card__meta">

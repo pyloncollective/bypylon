@@ -324,10 +324,10 @@ i { font-style: normal; }
 /* Cols 1-7: Larger Artist Display Name, zero background/shadow box */
 .mast-name {
   grid-column: 1 / span 7;
-  justify-self: start;
+  justify-self: stretch;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: var(--name-size);
+  font-size: calc(var(--name-size) * var(--name-fit, 1));
   line-height: 0.84;
   letter-spacing: -0.036em;
   text-transform: uppercase;
