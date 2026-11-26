@@ -372,7 +372,73 @@
 
   const MEDIA_DB_NAME = 'pylon_portal_media_v1';
   const MEDIA_STORE = 'images';
-  const mediaCache = new Map(); // key ("idb://...") -> dataUrl
+  const mediaCache = new Map(); // key ("idb://..." or Drive URL) -> dataUrl
+  const mediaSyncStatus = new Map(); // ref -> 'syncing' | 'synced' | 'local'
+  let mediaUploadQueue = Promise.resolve();
+
+  function isCloudMediaUrl(raw) {
+    const clean = String(raw || '').trim();
+    return /^https?:\/\/(lh3\.googleusercontent\.com\/d\/|drive\.google\.com\/)/i.test(clean);
+  }
+
+  function isDriveOrUploadedMediaRef(raw) {
+    return isUploadedMediaRef(raw) || isCloudMediaUrl(raw);
+  }
+
+  function getMediaPillMeta(raw) {
+    const clean = String(raw || '').trim();
+    const st = mediaSyncStatus.get(clean);
+    if (st === 'syncing') return { cls: 'is-syncing', text: 'Uploading to Drive...' };
+    if (isCloudMediaUrl(clean)) return { cls: '', text: 'Synced to Drive ✓' };
+    if (st === 'local') return { cls: 'is-local', text: 'Saved Locally (Sync Pending)' };
+    return { cls: 'is-local', text: 'Still Uploaded (Local)' };
+  }
+
+  async function uploadMediaToCloud({ memberKey, slotKey, label, fileName, dataUrl }) {
+    const endpoint = getCloudEndpoint();
+    if (!endpoint) return null;
+    const run = async () => {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'upload_media',
+          username: memberKey,
+          slotKey,
+          label: label || slotKey,
+          fileName: fileName || `${memberKey}-${slotKey}.jpg`,
+          dataUrl
+        })
+      });
+      if (!res.ok) return null;
+      const json = await res.json().catch(() => null);
+      if (json && json.ok && json.imageUrl) return json;
+      return null;
+    };
+    const next = mediaUploadQueue.then(run, run);
+    mediaUploadQueue = next.catch(() => null);
+    return next;
+  }
+
+  function bindDropzone(el, onFile) {
+    if (!el) return;
+    el.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.add('is-dragover');
+    });
+    el.addEventListener('dragleave', (e) => {
+      e.stopPropagation();
+      if (!el.contains(e.relatedTarget)) el.classList.remove('is-dragover');
+    });
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.remove('is-dragover');
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) onFile(file);
+    });
+  }
   let mediaDbPromise = null;
 
   function openMediaDb() {
@@ -498,8 +564,11 @@
   function resolveMediaSrc(raw) {
     const clean = String(raw || '').trim();
     if (!clean) return '';
+    if (mediaCache.has(clean)) {
+      return mediaCache.get(clean) || clean;
+    }
     if (clean.startsWith('idb://')) {
-      return mediaCache.get(clean) || '';
+      return '';
     }
     return clean;
   }
@@ -722,19 +791,28 @@
       const stepsDone = `${countCompletedSteps(state)}/${STEPS.length}`;
       const readiness = computeReadinessPct(state);
       const cloudPayload = buildCloudPayload(state);
-      await fetch(endpoint, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({
-          action: 'upsert',
-          username: activeMemberKey,
-          fullName: CREW[activeMemberKey].name,
-          stepsCompleted: stepsDone,
-          readinessPct: readiness,
-          payload: cloudPayload
-        })
+      const bodyStr = JSON.stringify({
+        action: 'upsert',
+        username: activeMemberKey,
+        fullName: CREW[activeMemberKey].name,
+        stepsCompleted: stepsDone,
+        readinessPct: readiness,
+        payload: cloudPayload
       });
+      try {
+        await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: bodyStr
+        });
+      } catch (_) {
+        await fetch(endpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: bodyStr
+        });
+      }
       logCrewActivity('save_draft', `Readiness ${readiness}% · Steps ${stepsDone} · Projects ${(state.projects || []).filter(p => p.title && p.title.trim()).length}`);
       const t = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
       setStatus(`Synced to Pylon Sheet · ${t}`, false);
@@ -742,6 +820,56 @@
     } catch (_) {
       setStatus('Saved locally (offline)', false);
       if (showToastMsg) showToast('Saved locally on this device');
+    }
+  }
+
+  async function syncPendingLocalMedia(memberKey) {
+    if (!state || activeMemberKey !== memberKey) return;
+    let uploadedAny = false;
+    const tryPromote = async (ref, slotKey, label, setUrl) => {
+      if (!ref || !String(ref).startsWith('idb://')) return;
+      const dataUrl = mediaCache.get(ref);
+      if (!dataUrl) return;
+      mediaSyncStatus.set(ref, 'syncing');
+      const res = await uploadMediaToCloud({ memberKey, slotKey, label, dataUrl });
+      if (res && res.imageUrl) {
+        mediaCache.set(res.imageUrl, dataUrl);
+        mediaSyncStatus.set(res.imageUrl, 'synced');
+        mediaSyncStatus.delete(ref);
+        setUrl(res.imageUrl);
+        deleteMediaAsset(ref);
+        uploadedAny = true;
+      } else {
+        mediaSyncStatus.set(ref, 'local');
+      }
+    };
+
+    if (state.heroPosterUrl && String(state.heroPosterUrl).startsWith('idb://')) {
+      await tryPromote(state.heroPosterUrl, 'hero', 'Opening Poster', (u) => { state.heroPosterUrl = u; });
+    }
+    if (Array.isArray(state.projects)) {
+      for (let i = 0; i < state.projects.length; i++) {
+        const p = state.projects[i];
+        if (p && p.stillPreviewUrl && String(p.stillPreviewUrl).startsWith('idb://')) {
+          await tryPromote(p.stillPreviewUrl, `proj_${p.id || i}`, p.title || `Project ${i + 1}`, (u) => { p.stillPreviewUrl = u; });
+        }
+      }
+    }
+    if (Array.isArray(state.sponsors)) {
+      for (let i = 0; i < state.sponsors.length; i++) {
+        const sp = state.sponsors[i];
+        if (sp && sp.logoUrl && String(sp.logoUrl).startsWith('idb://')) {
+          await tryPromote(sp.logoUrl, `sponsor_${sp.id || i}`, sp.name || `Sponsor ${i + 1}`, (u) => { sp.logoUrl = u; });
+        }
+      }
+    }
+
+    if (uploadedAny && activeMemberKey === memberKey) {
+      saveLocalState();
+      renderCurrentStep();
+      renderLivePreview();
+      syncToCloud(false);
+      showToast('Synced local stills to Google Drive');
     }
   }
 
@@ -1471,19 +1599,21 @@
             <input class="input" data-field="heroTimecode" value="${esc(state.heroTimecode)}" placeholder="e.g. 00:42 – 00:58 of Beer League">
           </div>
           <div class="field">
-            <label>Poster / Fallback Still URL <span class="hint-inline">Optional image URL or upload to test</span></label>
-            <div class="still-upload-row">
-              ${isUploadedMediaRef(state.heroPosterUrl) ? `
-                <div class="still-thumb-pill">
+            <label>Poster / Fallback Still <span class="hint-inline">Drop image, paste URL, or upload</span></label>
+            <div class="still-upload-row" id="heroPosterDrop">
+              ${isDriveOrUploadedMediaRef(state.heroPosterUrl) ? (() => {
+                const meta = getMediaPillMeta(state.heroPosterUrl);
+                return `
+                <div class="still-thumb-pill ${meta.cls}">
                   <img class="still-thumb-img" src="${esc(resolveMediaSrc(state.heroPosterUrl))}" alt="">
-                  <span class="still-thumb-label">Uploaded Poster ✓</span>
+                  <span class="still-thumb-label">${meta.text}</span>
                   <button type="button" class="still-clear-btn" id="clearHeroPosterBtn">Clear</button>
-                </div>
-              ` : `
-                <input class="input" data-field="heroPosterUrl" value="${esc(state.heroPosterUrl || '')}" placeholder="https://... or upload image">
+                </div>`;
+              })() : `
+                <input class="input" data-field="heroPosterUrl" value="${esc(state.heroPosterUrl || '')}" placeholder="Drop image here, paste URL, or Upload">
               `}
               <label class="btn btn-sm" style="cursor:pointer; flex-shrink:0;">
-                ${isUploadedMediaRef(state.heroPosterUrl) ? 'Replace' : 'Upload Image'}
+                ${isDriveOrUploadedMediaRef(state.heroPosterUrl) ? 'Replace' : 'Upload Image'}
                 <input type="file" id="heroPosterFile" accept="image/*" hidden>
               </label>
             </div>
@@ -1503,34 +1633,39 @@
       if (clearHeroBtn) {
         clearHeroBtn.addEventListener('click', () => {
           deleteMediaAsset(state.heroPosterUrl);
+          mediaSyncStatus.delete(state.heroPosterUrl);
           state.heroPosterUrl = '';
           saveLocalState();
           renderCurrentStep();
         });
       }
 
+      const handleHeroPosterFile = (file) => {
+        if (!file) return;
+        handleMediaFileUpload({
+          file,
+          slotKey: 'hero',
+          label: 'Opening Poster',
+          maxW: 1920,
+          getRef: () => state.heroPosterUrl,
+          setRef: (val) => { state.heroPosterUrl = val; },
+          onUpdate: () => {
+            if (STEPS[currentStepIdx]?.id === 'reel') renderCurrentStep();
+            renderLivePreview();
+          },
+          toastLabel: 'Opening poster'
+        });
+      };
+
       const posterInp = document.getElementById('heroPosterFile');
       if (posterInp) {
         posterInp.addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
           e.target.value = '';
-          if (!file) return;
-          resizeImageToDataUrl(file, 1280)
-            .then(async (dataUrl) => {
-              const oldRef = state.heroPosterUrl;
-              const key = `idb://${activeMemberKey}/hero_${Date.now()}`;
-              await saveMediaAsset(key, dataUrl);
-              if (oldRef && oldRef.startsWith('idb://') && oldRef !== key) deleteMediaAsset(oldRef);
-              state.heroPosterUrl = key;
-              saveLocalState();
-              renderCurrentStep();
-              showToast('Opening poster preview updated');
-            })
-            .catch(() => {
-              showToast('Could not read image — try JPG or PNG (HEIC unsupported)');
-            });
+          handleHeroPosterFile(file);
         });
       }
+      bindDropzone(document.getElementById('heroPosterDrop'), handleHeroPosterFile);
     }
 
     else if (st.id === 'projects') {
@@ -1638,7 +1773,7 @@
      IMAGE THUMB HELPER FOR LIVE STILL PREVIEWING
      ------------------------------------------------------------------------ */
 
-  function resizeImageToDataUrl(file, maxW = 1280, preservePng = false) {
+  function resizeImageToDataUrl(file, maxW = 1920, preservePng = false) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -1652,7 +1787,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const isPng = preservePng && /png|webp|svg/i.test(file.type || file.name || '');
-            resolve(isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.76));
+            resolve(isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.86));
           } catch (e) {
             reject(e);
           }
@@ -1663,6 +1798,50 @@
       reader.onerror = () => reject(new Error('File read failed'));
       reader.readAsDataURL(file);
     });
+  }
+
+  async function handleMediaFileUpload({ file, slotKey, label, maxW = 1920, preservePng = false, getRef, setRef, onUpdate, toastLabel }) {
+    if (!file) return;
+    const memberKey = activeMemberKey;
+    try {
+      const dataUrl = await resizeImageToDataUrl(file, maxW, preservePng);
+      const oldRef = getRef();
+      const idbKey = `idb://${memberKey}/${slotKey}_${Date.now()}`;
+      await saveMediaAsset(idbKey, dataUrl);
+      if (oldRef && oldRef.startsWith('idb://') && oldRef !== idbKey) deleteMediaAsset(oldRef);
+      mediaSyncStatus.set(idbKey, 'syncing');
+      setRef(idbKey);
+      saveLocalState();
+      onUpdate();
+      showToast(`${toastLabel} added — uploading to Drive...`);
+
+      const res = await uploadMediaToCloud({
+        memberKey,
+        slotKey,
+        label,
+        fileName: file.name,
+        dataUrl
+      });
+
+      if (activeMemberKey !== memberKey || getRef() !== idbKey) return;
+      if (res && res.imageUrl) {
+        mediaCache.set(res.imageUrl, dataUrl);
+        mediaSyncStatus.set(res.imageUrl, 'synced');
+        mediaSyncStatus.delete(idbKey);
+        setRef(res.imageUrl);
+        deleteMediaAsset(idbKey);
+        saveLocalState();
+        onUpdate();
+        syncToCloud(false);
+        showToast(`${toastLabel} synced to Google Drive`);
+      } else {
+        mediaSyncStatus.set(idbKey, 'local');
+        onUpdate();
+        showToast(`${toastLabel} saved locally (Drive sync pending)`);
+      }
+    } catch (_) {
+      showToast('Could not read image — try JPG or PNG (HEIC unsupported)');
+    }
   }
 
   function renderStillsAndSponsorsStep(body) {
@@ -1705,19 +1884,21 @@
                 <input class="input" data-spfield="url" data-idx="${idx}" value="${esc(sp.url || '')}" placeholder="https://www.shapewlb.com/dario">
               </div>
               <div class="field">
-                <label>Brand Logo <span class="hint-inline">Logo URL or upload PNG/JPG</span></label>
-                <div class="still-upload-row">
-                  ${isUploadedMediaRef(sp.logoUrl) ? `
-                    <div class="still-thumb-pill">
+                <label>Brand Logo <span class="hint-inline">Drop PNG/JPG, paste URL, or upload</span></label>
+                <div class="still-upload-row" data-sponsordrop="${idx}">
+                  ${isDriveOrUploadedMediaRef(sp.logoUrl) ? (() => {
+                    const meta = getMediaPillMeta(sp.logoUrl);
+                    return `
+                    <div class="still-thumb-pill ${meta.cls}">
                       <img class="still-thumb-img is-logo" src="${esc(resolveMediaSrc(sp.logoUrl))}" alt="">
-                      <span class="still-thumb-label">Logo Uploaded ✓</span>
+                      <span class="still-thumb-label">${meta.text}</span>
                       <button type="button" class="still-clear-btn" data-sp-clearlogo="${idx}">Clear</button>
-                    </div>
-                  ` : `
-                    <input class="input" data-spfield="logoUrl" data-idx="${idx}" value="${esc(sp.logoUrl || '')}" placeholder="Image URL or click Upload Logo">
+                    </div>`;
+                  })() : `
+                    <input class="input" data-spfield="logoUrl" data-idx="${idx}" value="${esc(sp.logoUrl || '')}" placeholder="Drop logo here, paste URL, or Upload">
                   `}
                   <label class="btn btn-sm" style="cursor:pointer; flex-shrink:0;">
-                    ${isUploadedMediaRef(sp.logoUrl) ? 'Replace' : 'Upload Logo'}
+                    ${isDriveOrUploadedMediaRef(sp.logoUrl) ? 'Replace' : 'Upload Logo'}
                     <input type="file" data-splogofile="${idx}" accept="image/*" hidden>
                   </label>
                 </div>
@@ -1767,34 +1948,46 @@
       });
     });
 
+    const handleSponsorLogoFile = (idx, file) => {
+      if (!file || !state.sponsors[idx]) return;
+      handleMediaFileUpload({
+        file,
+        slotKey: `sponsor_${state.sponsors[idx].id || idx}`,
+        label: state.sponsors[idx].name || `Sponsor ${idx + 1}`,
+        maxW: 640,
+        preservePng: true,
+        getRef: () => state.sponsors[idx]?.logoUrl || '',
+        setRef: (val) => {
+          if (state.sponsors[idx]) state.sponsors[idx].logoUrl = val;
+          if (previewView !== 'information') setPreviewView('information');
+        },
+        onUpdate: () => {
+          if (STEPS[currentStepIdx]?.id === 'stills') renderStillsAndSponsorsStep(body);
+          renderLivePreview();
+        },
+        toastLabel: 'Brand logo'
+      });
+    };
+
     body.querySelectorAll('[data-splogofile]').forEach((inp) => {
       inp.addEventListener('change', (e) => {
         const idx = Number(inp.dataset.splogofile);
         const file = e.target.files && e.target.files[0];
         e.target.value = '';
-        if (!file) return;
-        resizeImageToDataUrl(file, 480, true)
-          .then(async (dataUrl) => {
-            const oldRef = state.sponsors[idx].logoUrl;
-            const key = `idb://${activeMemberKey}/sponsor_${state.sponsors[idx].id || idx}_${Date.now()}`;
-            await saveMediaAsset(key, dataUrl);
-            if (oldRef && oldRef.startsWith('idb://') && oldRef !== key) deleteMediaAsset(oldRef);
-            state.sponsors[idx].logoUrl = key;
-            if (previewView !== 'information') setPreviewView('information');
-            saveLocalState();
-            renderStillsAndSponsorsStep(body);
-            showToast('Brand logo updated');
-          })
-          .catch(() => {
-            showToast('Could not read logo — try PNG or JPG');
-          });
+        handleSponsorLogoFile(idx, file);
       });
+    });
+
+    body.querySelectorAll('[data-sponsordrop]').forEach((dz) => {
+      const idx = Number(dz.dataset.sponsordrop);
+      bindDropzone(dz, (file) => handleSponsorLogoFile(idx, file));
     });
 
     body.querySelectorAll('[data-sp-clearlogo]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.spClearlogo);
         deleteMediaAsset(state.sponsors[idx].logoUrl);
+        mediaSyncStatus.delete(state.sponsors[idx].logoUrl);
         state.sponsors[idx].logoUrl = '';
         saveLocalState();
         renderStillsAndSponsorsStep(body);
@@ -2119,19 +2312,21 @@
                 <input class="input" data-pfield="watchUrl" data-idx="${idx}" value="${esc(p.watchUrl)}" placeholder="https://youtube.com/watch?v=... or Vimeo / Drive">
               </div>
               <div class="field">
-                <label>Hover Background Still <span class="hint-inline">Paste image URL or upload (unlimited stills)</span></label>
-                <div class="still-upload-row">
-                  ${isUploadedMediaRef(p.stillPreviewUrl) ? `
-                    <div class="still-thumb-pill">
+                <label>Hover Background Still <span class="hint-inline">Drop image, paste URL, or upload</span></label>
+                <div class="still-upload-row" data-stilldrop="${idx}">
+                  ${isDriveOrUploadedMediaRef(p.stillPreviewUrl) ? (() => {
+                    const meta = getMediaPillMeta(p.stillPreviewUrl);
+                    return `
+                    <div class="still-thumb-pill ${meta.cls}">
                       <img class="still-thumb-img" src="${esc(resolveMediaSrc(p.stillPreviewUrl))}" alt="">
-                      <span class="still-thumb-label">Still Uploaded ✓</span>
+                      <span class="still-thumb-label">${meta.text}</span>
                       <button type="button" class="still-clear-btn" data-clearstill="${idx}">Clear</button>
-                    </div>
-                  ` : `
-                    <input class="input" data-pfield="stillPreviewUrl" data-idx="${idx}" value="${esc(p.stillPreviewUrl || '')}" placeholder="Image URL or click Upload Still">
+                    </div>`;
+                  })() : `
+                    <input class="input" data-pfield="stillPreviewUrl" data-idx="${idx}" value="${esc(p.stillPreviewUrl || '')}" placeholder="Drop image here, paste URL, or Upload">
                   `}
                   <label class="btn btn-sm" style="cursor:pointer; flex-shrink:0;">
-                    ${isUploadedMediaRef(p.stillPreviewUrl) ? 'Replace' : 'Upload Still'}
+                    ${isDriveOrUploadedMediaRef(p.stillPreviewUrl) ? 'Replace' : 'Upload Still'}
                     <input type="file" data-stillfile="${idx}" accept="image/*" hidden>
                   </label>
                 </div>
@@ -2168,34 +2363,45 @@
       });
     });
 
+    const handleProjectStillFile = (idx, file) => {
+      if (!file || !state.projects[idx]) return;
+      handleMediaFileUpload({
+        file,
+        slotKey: `proj_${state.projects[idx].id || idx}`,
+        label: state.projects[idx].title || `Row #${String(idx + 1).padStart(2, '0')}`,
+        maxW: 1920,
+        getRef: () => state.projects[idx]?.stillPreviewUrl || '',
+        setRef: (val) => {
+          if (state.projects[idx]) state.projects[idx].stillPreviewUrl = val;
+          previewHoveredIdx = idx;
+        },
+        onUpdate: () => {
+          if (STEPS[currentStepIdx]?.id === 'projects') renderProjectsStep(body);
+          renderLivePreview();
+        },
+        toastLabel: `Row #${String(idx + 1).padStart(2, '0')} still`
+      });
+    };
+
     body.querySelectorAll('[data-stillfile]').forEach((inp) => {
       inp.addEventListener('change', (e) => {
         const idx = Number(inp.dataset.stillfile);
         const file = e.target.files && e.target.files[0];
         e.target.value = '';
-        if (!file) return;
-        resizeImageToDataUrl(file, 1280)
-          .then(async (dataUrl) => {
-            const oldRef = state.projects[idx].stillPreviewUrl;
-            const key = `idb://${activeMemberKey}/proj_${state.projects[idx].id || idx}_${Date.now()}`;
-            await saveMediaAsset(key, dataUrl);
-            if (oldRef && oldRef.startsWith('idb://') && oldRef !== key) deleteMediaAsset(oldRef);
-            state.projects[idx].stillPreviewUrl = key;
-            previewHoveredIdx = idx;
-            saveLocalState();
-            renderProjectsStep(body);
-            showToast(`Row #${String(idx + 1).padStart(2, '0')} hover still updated`);
-          })
-          .catch(() => {
-            showToast('Could not read image — try JPG or PNG (HEIC unsupported)');
-          });
+        handleProjectStillFile(idx, file);
       });
+    });
+
+    body.querySelectorAll('[data-stilldrop]').forEach((dz) => {
+      const idx = Number(dz.dataset.stilldrop);
+      bindDropzone(dz, (file) => handleProjectStillFile(idx, file));
     });
 
     body.querySelectorAll('[data-clearstill]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.clearstill);
         deleteMediaAsset(state.projects[idx]?.stillPreviewUrl);
+        mediaSyncStatus.delete(state.projects[idx]?.stillPreviewUrl);
         state.projects[idx].stillPreviewUrl = '';
         saveLocalState();
         renderProjectsStep(body);
@@ -2663,7 +2869,7 @@
     renderLivePreview();
     setStatus('Ready · Auto-saving', false);
 
-    // Hydrate IndexedDB stills/logos and seamlessly migrate any legacy base64 stills out of localStorage
+    // Hydrate IndexedDB stills/logos, fetch latest cloud draft, and promote any local-only idb:// uploads to Google Drive
     (async () => {
       const targetKey = activeMemberKey;
       const migrated = await migrateLegacyDataUrls(targetKey, state);
@@ -2673,9 +2879,25 @@
         renderCurrentStep();
         renderLivePreview();
       }
-      tryFetchCloudDraft(targetKey);
+      await tryFetchCloudDraft(targetKey);
+      if (activeMemberKey === targetKey) {
+        await hydrateMediaCacheForState(state);
+        syncPendingLocalMedia(targetKey);
+      }
     })();
   }
+
+  // Prevent browser from navigating away if a file is dropped slightly outside a dropzone
+  document.addEventListener('dragover', (e) => {
+    if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('drop', (e) => {
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+      e.preventDefault();
+    }
+  });
 
   document.getElementById('pwToggle').addEventListener('click', () => {
     const inp = document.getElementById('loginPass');
@@ -2748,11 +2970,13 @@
     }
   });
 
-  document.getElementById('saveStepOnlyBtn').addEventListener('click', () => {
+  document.getElementById('saveStepOnlyBtn').addEventListener('click', async () => {
+    await syncPendingLocalMedia(activeMemberKey);
     syncToCloud(true);
   });
 
   document.getElementById('nextStepBtn').addEventListener('click', async () => {
+    await syncPendingLocalMedia(activeMemberKey);
     await syncToCloud(currentStepIdx === STEPS.length - 1);
     if (currentStepIdx < STEPS.length - 1) {
       currentStepIdx++;
@@ -2768,7 +2992,8 @@
     }
   });
 
-  document.getElementById('syncNowBtn').addEventListener('click', () => {
+  document.getElementById('syncNowBtn').addEventListener('click', async () => {
+    await syncPendingLocalMedia(activeMemberKey);
     syncToCloud(true);
   });
 
